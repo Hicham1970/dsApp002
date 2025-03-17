@@ -7,8 +7,9 @@ import { Routes, Route } from "react-router-dom";
 import Hydrostatic from "./scenes/hydrostatic/Hydrostatic";
 // import Faq from "./scenes/faq/Faq";
 import DSComponent from "./scenes/ds";
-import Login from "./scenes/login";
-import Topbar from "./scenes/global/Topbar";
+import TopBar from "./scenes/global/TopBar";
+import Navbar from "./scenes/global/Navbar";
+import LoadingPage from "./scenes/loadingPage";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -19,18 +20,17 @@ function App() {
         <CssBaseline />
         <div className="app">
           <main className="content">
-            <Topbar />
-            {/* <Login /> */}
-            {/* <DSComponent /> */}
-            <Hydrostatic />
-            {/* <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+            {/* <TopBar /> */}
+            <Navbar />
+
+            <Routes>
+              <Route path="/" element={<LoadingPage />} />
+              <Route path="/ds" element={<DSComponent />} />
+              {/* <Route path="/dashboard" element={<Dashboard />} /> */}
               <Route path="/Hydrostatic" element={<Hydrostatic />} />
-              <Route path="/ds" element={<DS />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/dsManual" element={<DSManualComponent />} />
-            </Routes> */}
+              {/* <Route path="/faq" element={<Faq />} /> */}
+
+            </Routes>
           </main>
         </div>
       </ThemeProvider>

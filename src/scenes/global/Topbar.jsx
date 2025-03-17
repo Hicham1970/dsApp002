@@ -9,7 +9,11 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import InputBase from "@mui/material/InputBase";
-const Topbar = () => {
+import { Link } from 'react-router-dom';
+
+
+
+const TopBar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -36,13 +40,14 @@ const Topbar = () => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton>
+        <IconButton component={Link} to="/hydrostatic">
           <NotificationsOutlinedIcon />
         </IconButton>
-        <IconButton>
+        <IconButton component={Link} to="/ds">
           <SettingsOutlinedIcon />
         </IconButton>
-        <IconButton>
+
+        <IconButton component={Link} to="/">
           <PersonOutlinedIcon />
         </IconButton>
       </Box>
@@ -50,4 +55,4 @@ const Topbar = () => {
   );
 };
 
-export default Topbar;
+export default TopBar;

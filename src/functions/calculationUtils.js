@@ -86,13 +86,11 @@ export const calculateForeCorrected = (trim, foreDistance, lbm, meanFore) => {
   // Perform fore corrected calculation
   let foreCorrected;
   if (foreDistanceValue < 0) {
-    foreCorrected =
-      meanForeValue -
-      ((trimValue * foreDistanceValue) / lbmValue) * (trimValue > 0 ? 1 : -1);
+    foreCorrected = meanForeValue + ((trimValue * foreDistanceValue) / lbmValue);
   } else if (foreDistanceValue > 0) {
     foreCorrected =
       meanForeValue +
-      ((trimValue * foreDistanceValue) / lbmValue) * (trimValue > 0 ? 1 : -1);
+      ((trimValue * foreDistanceValue) / lbmValue);
   } else {
     foreCorrected = meanForeValue;
   }
@@ -122,12 +120,12 @@ export const calculateAftCorrected = (trim, aftDistance, lbm, meanAft) => {
   let aftCorrected;
   if (aftDistanceValue < 0) {
     aftCorrected =
-      meanAftValue -
-      ((trimValue * aftDistanceValue) / lbmValue) * (trimValue > 0 ? 1 : -1);
+      meanAftValue +
+      ((trimValue * aftDistanceValue) / lbmValue);
   } else if (aftDistanceValue > 0) {
     aftCorrected =
       meanAftValue +
-      ((trimValue * aftDistanceValue) / lbmValue) * (trimValue > 0 ? 1 : -1);
+      ((trimValue * aftDistanceValue) / lbmValue);
   } else {
     aftCorrected = meanAftValue;
   }
@@ -151,12 +149,12 @@ export const calculateMidCorrected = (trim, midDistance, lbm, meanMid) => {
   let midCorrected;
   if (midDistanceValue < 0) {
     midCorrected =
-      Number(meanMidValue) -
-      ((Number(trimValue) * Number(midDistanceValue)) / Number(lbmValue)) * (Number(trimValue) > 0 ? 1 : -1);
+      Number(meanMidValue) +
+      ((Number(trimValue) * Number(midDistanceValue)) / Number(lbmValue));
   } else if (midDistanceValue > 0) {
     midCorrected =
       Number(meanMidValue) +
-      ((Number(trimValue) * Number(midDistanceValue)) / Number(lbmValue)) * (Number(trimValue) > 0 ? 1 : -1);
+      ((Number(trimValue) * Number(midDistanceValue)) / Number(lbmValue));
   } else {
     midCorrected = Number(meanMidValue);
   }
@@ -168,11 +166,12 @@ export const calculateTrimCorrected = (meanAftCorrected, meanForeCorrected) => {
   const foreCorrectedValue = Number(meanForeCorrected);
   const aftCorrectedValue = Number(meanAftCorrected);
 
-  // Calculate absolute difference to ensure non-negative trim
-  const trimCorrected = Math.abs(aftCorrectedValue - foreCorrectedValue);
+
+  const trimCorrected = aftCorrectedValue - foreCorrectedValue;
 
   return trimCorrected.toFixed(2);
 };
+
 
 export const calculateMeanForeAft = (foreCorrected, aftCorrected) => {
   let meanForeAft = 0;
@@ -579,12 +578,12 @@ export const calculateForeCorrectedFinal = (trimFinal, foreDistanceFinal, lbmFin
   let foreCorrectedFinal;
   if (foreDistanceFinalValue < 0) {
     foreCorrectedFinal =
-      meanForeFinalValue -
-      ((trimFinalValue * foreDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      meanForeFinalValue +
+      ((trimFinalValue * foreDistanceFinalValue) / lbmFinalValue);
   } else if (foreDistanceFinalValue > 0) {
     foreCorrectedFinal =
       meanForeFinalValue +
-      ((trimFinalValue * foreDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      ((trimFinalValue * foreDistanceFinalValue) / lbmFinalValue);
   } else {
     foreCorrectedFinal = meanForeFinalValue;
   }
@@ -614,12 +613,12 @@ export const calculateAftCorrectedFinal = (trimFinal, aftDistanceFinal, lbmFinal
   let aftCorrectedFinal;
   if (aftDistanceFinalValue < 0) {
     aftCorrectedFinal =
-      meanAftFinalValue -
-      ((trimFinalValue * aftDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      meanAftFinalValue +
+      ((trimFinalValue * aftDistanceFinalValue) / lbmFinalValue);
   } else if (aftDistanceFinalValue > 0) {
     aftCorrectedFinal =
       meanAftFinalValue +
-      ((trimFinalValue * aftDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      ((trimFinalValue * aftDistanceFinalValue) / lbmFinalValue);
   } else {
     aftCorrectedFinal = meanAftFinalValue;
   }
@@ -649,12 +648,12 @@ export const calculateMidCorrectedFinal = (trimFinal, midDistanceFinal, lbmFinal
   let midCorrectedFinal;
   if (midDistanceFinalValue < 0) {
     midCorrectedFinal =
-      meanMidFinalValue -
-      ((trimFinalValue * midDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      meanMidFinalValue +
+      ((trimFinalValue * midDistanceFinalValue) / lbmFinalValue);
   } else if (midDistanceFinalValue > 0) {
     midCorrectedFinal =
       meanMidFinalValue +
-      ((trimFinalValue * midDistanceFinalValue) / lbmFinalValue) * (trimFinalValue > 0 ? 1 : -1);
+      ((trimFinalValue * midDistanceFinalValue) / lbmFinalValue);
   } else {
     midCorrectedFinal = meanMidFinalValue;
   }
@@ -666,8 +665,8 @@ export const calculateTrimCorrectedFinal = (meanAftCorrectedFinal, meanForeCorre
   const foreCorrectedFinalValue = Number(meanForeCorrectedFinal);
   const aftCorrectedFinalValue = Number(meanAftCorrectedFinal);
 
-  // Calculate absolute difference to ensure non-negative trim
-  const trimCorrectedFinal = Math.abs(aftCorrectedFinalValue - foreCorrectedFinalValue);
+
+  const trimCorrectedFinal = aftCorrectedFinalValue - foreCorrectedFinalValue;
 
   return trimCorrectedFinal.toFixed(2);
 };

@@ -1,5 +1,9 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from "react";
+import Radio from '@mui/material/Radio';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import RadioGroup from '@mui/material/RadioGroup';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -58,6 +62,7 @@ import {
   calculateTotalFinal,
 } from "../functions/calculationUtils";
 import Footer from "./Footer";
+import VesselInfos from './Infos';
 
 export default function DS() {
   const theme = useTheme();
@@ -65,6 +70,9 @@ export default function DS() {
   const isNonMobile = useMediaQuery("(min-width: 600px)");
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoader, setIsLoader] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDischarging, setIsDischarging] = useState(false);
+
   const [lbp, setLbp] = useState();
   // Section Initial
   const [keelCorrection, setKeelCorrection] = useState();
@@ -181,208 +189,18 @@ export default function DS() {
   const [othersFinal, setOthersFinal] = useState();
   const [totalFinal, setTotalFinal] = useState();
 
-  // Save form data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem("lbp", lbp);
-    localStorage.setItem("keelCorrection", keelCorrection);
-    localStorage.setItem("foreDistance", foreDistance);
-    localStorage.setItem("aftDistance", aftDistance);
-    localStorage.setItem("midDistance", midDistance);
-    localStorage.setItem("forePort", forePort);
-    localStorage.setItem("foreStbd", foreStbd);
-    localStorage.setItem("meanFore", meanFore);
-    localStorage.setItem("aftPort", aftPort);
-    localStorage.setItem("aftStbd", aftStbd);
-    localStorage.setItem("meanAft", meanAft);
-    localStorage.setItem("midPort", midPort);
-    localStorage.setItem("midStbd", midStbd);
-    localStorage.setItem("meanMid", meanMid);
-    localStorage.setItem("trim", trim);
-    localStorage.setItem("lbm", lbm);
-    localStorage.setItem("foreCorrected", foreCorrected);
-    localStorage.setItem("aftCorrected", aftCorrected);
-    localStorage.setItem("midCorrected", midCorrected);
-    localStorage.setItem("trimCorrected", trimCorrected);
-    localStorage.setItem("meanOfMean", meanOfMean);
-    localStorage.setItem("quarterMean", quarterMean);
-    localStorage.setItem("meanForeAft", meanForeAft);
-    localStorage.setItem("density", density);
-    localStorage.setItem("draftSup", draftSup);
-    localStorage.setItem("draftInf", draftInf);
-    localStorage.setItem("displacementSup", displacementSup);
-    localStorage.setItem("displacementInf", displacementInf);
-    localStorage.setItem("displacement", displacement);
-    localStorage.setItem("tpc", tpc);
-    localStorage.setItem("lcf", lcf);
-    localStorage.setItem("quarter", quarter);
-    localStorage.setItem("mtcPlus50", mtcPlus50);
-    localStorage.setItem("quarterPlus50", quarterPlus50);
-    localStorage.setItem("quarterMinus50", quarterMinus50);
-    localStorage.setItem("mtcMinus50", mtcMinus50);
-    localStorage.setItem("firstTrimCorrection", firstTrimCorrection);
-    localStorage.setItem("secondTrimCorrection", secondTrimCorrection);
-    localStorage.setItem(
-      "displacementTrimCorrected",
-      displacementTrimCorrected
-    );
-    localStorage.setItem(
-      "displacementDstyCorrected",
-      displacementDstyCorrected
-    );
-    localStorage.setItem("mtcPlus50", mtcPlus50);
-    localStorage.setItem("quarterPlus50", quarterPlus50);
-    localStorage.setItem("ballast", ballast);
-    localStorage.setItem("freshWater", freshWater);
-    localStorage.setItem("fuel", fuel);
-    localStorage.setItem("diesel", diesel);
-    localStorage.setItem("lubOil", lubOil);
-    localStorage.setItem("others", others);
-    localStorage.setItem("total", total);
-    localStorage.setItem("lightship", lightship);
-    localStorage.setItem("constant", constant);
-    localStorage.setItem("netLight", netLight);
 
-    localStorage.setItem("netLoad", netLoad);
-    localStorage.setItem("cargo", cargo);
-    // pour la partie final
-    localStorage.setItem("forePortFinal", forePortFinal);
-    localStorage.setItem("foreStbdFinal", foreStbdFinal);
-    localStorage.setItem("meanForeFinal", meanForeFinal);
-    localStorage.setItem("aftPortFinal", aftPortFinal);
-    localStorage.setItem("aftStbdFinal", aftStbdFinal);
-    localStorage.setItem("meanAftFinal", meanAftFinal);
-    localStorage.setItem("midPortFinal", midPortFinal);
-    localStorage.setItem("midStbdFinal", midStbdFinal);
-    localStorage.setItem("meanMidFinal", meanMidFinal);
-    localStorage.setItem("trimFinal", trimFinal);
-    localStorage.setItem("lbmFinal", lbmFinal);
-    localStorage.setItem("foreCorrectedFinal", foreCorrectedFinal);
-    localStorage.setItem("aftCorrectedFinal", aftCorrectedFinal);
-    localStorage.setItem("midCorrectedFinal", midCorrectedFinal);
-    localStorage.setItem("trimCorrectedFinal", trimCorrectedFinal);
-    localStorage.setItem("meanForeAftFinal", meanForeAftFinal);
-    localStorage.setItem("meanOfMeanFinal", meanOfMeanFinal);
-    localStorage.setItem("quarterMeanFinal", quarterMeanFinal);
-    localStorage.setItem("draftSupFinal", draftSupFinal);
-    localStorage.setItem("draftInfFinal", draftInfFinal);
-    localStorage.setItem("displacementSupFinal", displacementFinal);
-    localStorage.setItem("displacementInfFinal", displacementInfFinal);
-    localStorage.setItem("displacementFinal", displacementFinal);
-    localStorage.setItem("tpcFinal", tpcFinal);
-    localStorage.setItem("tpcSupFinal", tpcSupFinal);
-    localStorage.setItem("tpcInfFinal", tpcInfFinal);
-    localStorage.setItem("lcfFinal", lcfFinal);
-    localStorage.setItem("lcfSupFinal", lcfSupFinal);
-    localStorage.setItem("lcfInfFinal", lcfInfFinal);
-    localStorage.setItem("quarterMinus50Final", quarterMinus50Final);
-    localStorage.setItem("quarterPlus50Final", quarterPlus50Final);
-    localStorage.setItem("mtcMinus50Final", mtcMinus50Final);
-    localStorage.setItem("mtcPlus50Final", mtcPlus50Final);
-    localStorage.setItem("ballastFinal", ballastFinal);
-    localStorage.setItem("freshWaterFinal", freshWaterFinal);
-    localStorage.setItem("fuelFinal", fuelFinal);
-    localStorage.setItem("dieselFinal", dieselFinal);
-    localStorage.setItem("lubOilFinal", lubOilFinal);
-    localStorage.setItem("othersFinal", othersFinal);
-    localStorage.setItem("totalFinal", totalFinal);
-    localStorage.setItem(
-      "displacementTrimCorrectedFinal",
-      displacementTrimCorrectedFinal
-    );
-  }, [
-    aftCorrected,
-    aftCorrectedFinal,
-    aftDistance,
-    aftPort,
-    aftPortFinal,
-    aftStbd,
-    aftStbdFinal,
-    ballast,
-    ballastFinal,
-    cargo,
-    constant,
-    density,
-    diesel,
-    dieselFinal,
-    displacement,
-    displacementDstyCorrected,
-    displacementFinal,
-    displacementInf,
-    displacementInfFinal,
-    displacementSup,
-    displacementTrimCorrected,
-    displacementTrimCorrectedFinal,
-    draftInf,
-    draftInfFinal,
-    draftSup,
-    draftSupFinal,
-    firstTrimCorrection,
-    foreCorrected,
-    foreCorrectedFinal,
-    foreDistance,
-    forePort,
-    forePortFinal,
-    foreStbd,
-    foreStbdFinal,
-    freshWater,
-    freshWaterFinal,
-    fuel,
-    fuelFinal,
-    keelCorrection,
-    lbm,
-    lbmFinal,
-    lbp,
-    lcf,
-    lcfFinal,
-    lcfInfFinal,
-    lcfSupFinal,
-    lightship,
-    lubOil,
-    lubOilFinal,
-    meanAft,
-    meanAftFinal,
-    meanFore,
-    meanForeAft,
-    meanForeAftFinal,
-    meanForeFinal,
-    meanMid,
-    meanMidFinal,
-    meanOfMean,
-    meanOfMeanFinal,
-    midCorrected,
-    midCorrectedFinal,
-    midDistance,
-    midPort,
-    midPortFinal,
-    midStbd,
-    midStbdFinal,
-    mtcMinus50,
-    mtcMinus50Final,
-    mtcPlus50,
-    mtcPlus50Final,
-    netLight,
-    netLoad,
-    others,
-    othersFinal,
-    quarter,
-    quarterMean,
-    quarterMeanFinal,
-    quarterMinus50,
-    quarterMinus50Final,
-    quarterPlus50,
-    quarterPlus50Final,
-    secondTrimCorrection,
-    total,
-    totalFinal,
-    tpc,
-    tpcFinal,
-    tpcInfFinal,
-    tpcSupFinal,
-    trim,
-    trimCorrected,
-    trimCorrectedFinal,
-    trimFinal,
-  ]);
+
+  const handleLoadingTypeChange = () => {
+    setIsLoading(true);
+    setIsDischarging(false);
+
+  }
+
+  const handleDischargingTypeChange = () => {
+    setIsDischarging(true);
+    setIsLoading(false);
+  }
 
   // Initial Memoized calculation results
   const meanForeCalculated = useMemo(
@@ -438,12 +256,7 @@ export default function DS() {
     const midDistanceValue = Number(midDistance);
     const trimValue = Number(trimCalculated);
 
-    console.log("Valeurs pour midCorrected:", {
-      lbmValue,
-      meanMidValue,
-      midDistanceValue,
-      trimValue,
-    });
+
 
     // Vérifiez que toutes les valeurs sont valides
     if (
@@ -465,8 +278,8 @@ export default function DS() {
   }, [trimCalculated, midDistance, lbmCalculated, meanMidCalculated]);
 
   const trimCorrectedCalculated = useMemo(
-    () => calculateTrimCorrected(meanAftCalculated, meanForeCalculated),
-    [meanAftCalculated, meanForeCalculated]
+    () => calculateTrimCorrected(aftCorrectedCalculated, foreCorrectedCalculated),
+    [aftCorrectedCalculated, foreCorrectedCalculated]
   );
 
   const meanForeAftCalculated = useMemo(
@@ -1101,15 +914,18 @@ export default function DS() {
     }
   }, [quarterMeanFinal]);
 
+
+
   return (
     <>
       <Box m="20px" id="printMe">
         <Header title="Mv Arc Rainbow" subtitle="Draft Survey Calculation" />
         <img
-          src={`${process.env.PUBLIC_URL}/assets/img/logo_iso.png`}
-          alt="Iso Logo"
-          style={{ width: "100px", height: "80px", marginRight: "5px" }}
+          src={`${process.env.PUBLIC_URL}/icon.png`}
+          alt="Mariner Logo"
+          style={{ width: "80px", height: "70px", marginRight: "5px" }}
         />
+        < VesselInfos />
         <form>
           <Box display="flex" gap="30px" flexDirection="row">
             <Box
@@ -1140,7 +956,7 @@ export default function DS() {
               </Box>
 
               <TextField
-                fullWidth
+
                 variant="filled"
                 type="number"
                 label="Lbp"
@@ -1213,7 +1029,41 @@ export default function DS() {
               />
             </Box>
             {/* Line 1 final */}
+            {/* RadioBox Start    */}
+            <Box
+              display="flex"
+              flexDirection="row"
+              justifyContent="center"
+              alignItems="left"
+              mx="10px"
+              mt="60px"
+              sx={{
+                fontSize: "44px",
+                width: "300px",
+              }}
 
+            >
+              <FormControl component="fieldset">
+                <FormLabel component="legend">Type de chargement</FormLabel>
+                <RadioGroup
+                  aria-label="loading-type"
+                  defaultValue="Loading"
+                  name="loading-type-radio-group"
+
+                  sx={{
+                    flexDirection: 'row',
+                    gap: 2,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FormControlLabel value="Loading" control={<Radio />} onChange={() => handleLoadingTypeChange()} label="Loading" size="lg" color={colors.greenAccent[500]} />
+                  <FormControlLabel value="Discharging" control={<Radio />} onChange={() => handleDischargingTypeChange()} label="Déchargement" size="lg" color={colors.redAccent[500]} />
+                </RadioGroup>
+              </FormControl>
+
+            </Box>
+
+            {/* RadioBox Finish    */}
             <Box
               display="flex"
               flexDirection="row"
@@ -1566,7 +1416,7 @@ export default function DS() {
                   type="number"
                   placeholder="Trim Co"
                   onChange={(e) => setTrimCorrected(e.target.value)}
-                  value={Number(trimCorrected).toFixed(2)}
+                  value={trimCorrected}
                   name="trimCorrected"
                   sx={{ gridColumn: "span 4" }}
                   InputProps={{ style: { fontSize: "40px" } }}
@@ -2111,19 +1961,7 @@ export default function DS() {
                     mx: "10px",
                   }}
                 >
-                  <TextField
-                    fullWidth
-                    disabled
-                    variant="outlined"
-                    type="number"
-                    label="Quarter"
-                    onChange={(e) => setQuarter(e.target.value)}
-                    value={Number(quarterMean) + 0}
-                    name="quarter"
-                    sx={{ flexColumn: "span 1", width: "130px", mx: "40px" }}
-                    InputProps={{ style: { fontSize: "40px" } }}
-                    InputLabelProps={{ style: { fontSize: "20px" } }}
-                  />
+
 
                   <TextField
                     fullWidth
@@ -2134,7 +1972,7 @@ export default function DS() {
                     onChange={(e) => setMtc(e.target.value)}
                     value={(Number(mtcPlus50) - Number(mtcMinus50)).toFixed(2)}
                     name="mtc"
-                    sx={{ flexColumn: "span 1", width: "130px" }}
+                    sx={{ flexColumn: "span 1", width: "130px", mx: "90px" }}
                     InputProps={{ style: { fontSize: "40px" } }}
                     InputLabelProps={{ style: { fontSize: "20px" } }}
                   />
@@ -2242,7 +2080,7 @@ export default function DS() {
               <Box
                 mt="40px"
                 display="flex"
-                gap="6px"
+                gap="10px"
                 sx={{
                   "& > div": { flexColumn: isNonMobile ? undefined : "span 2" },
                 }}
@@ -2256,7 +2094,7 @@ export default function DS() {
                   value={firstTrimCorrection}
                   name="firstTrimCorrection"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px" }, width: "100px" }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2268,7 +2106,7 @@ export default function DS() {
                   value={secondTrimCorrection}
                   name="secondTrimCorrection"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2280,7 +2118,7 @@ export default function DS() {
                   value={displacementTrimCorrected}
                   name="displacementTrimCorrected"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2294,7 +2132,7 @@ export default function DS() {
                   sx={{
                     gridColumn: "span 2",
                   }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
               </Box>
@@ -2472,21 +2310,7 @@ export default function DS() {
                     mx: "10px",
                   }}
                 >
-                  <TextField
-                    fullWidth
-                    disabled
-                    variant="outlined"
-                    type="number"
-                    label="QuarterFinal"
-                    onChange={(e) => setQuarterFinal(e.target.value)}
-                    value={(
-                      Number(quarterMeanFinal) - Number(keelCorrectionFinal)
-                    ).toFixed(2)}
-                    name="quarterFinal"
-                    sx={{ flexColumn: "span 1", width: "130px", mx: "40px" }}
-                    InputProps={{ style: { fontSize: "40px" } }}
-                    InputLabelProps={{ style: { fontSize: "20px" } }}
-                  />
+
 
                   <TextField
                     fullWidth
@@ -2499,7 +2323,7 @@ export default function DS() {
                       Number(mtcPlus50Final) - Number(mtcMinus50Final)
                     ).toFixed(2)}
                     name="mtcFinal"
-                    sx={{ flexColumn: "span 1", width: "130px" }}
+                    sx={{ flexColumn: "span 1", width: "130px", mx: "90px" }}
                     InputProps={{ style: { fontSize: "40px" } }}
                     InputLabelProps={{ style: { fontSize: "20px" } }}
                   />
@@ -2607,7 +2431,7 @@ export default function DS() {
               <Box
                 mt="40px"
                 display="flex"
-                gap="6px"
+                gap="10px"
                 sx={{
                   "& > div": { flexColumn: isNonMobile ? undefined : "span 2" },
                 }}
@@ -2621,7 +2445,7 @@ export default function DS() {
                   value={firstTrimCorrectionFinal}
                   name="firstTrimCorrectionFinal"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px" }, width: "180px" }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2633,7 +2457,7 @@ export default function DS() {
                   value={secondTrimCorrectionFinal}
                   name="secondTrimCorrectionFinal"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2647,7 +2471,7 @@ export default function DS() {
                   value={displacementTrimCorrectedFinal}
                   name="displacementTrimCorrectedFinal"
                   sx={{ gridColumn: "span 2" }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
                 <TextField
@@ -2663,7 +2487,7 @@ export default function DS() {
                   sx={{
                     gridColumn: "span 2",
                   }}
-                  InputProps={{ style: { fontSize: "40px", width: "180px" } }}
+                  InputProps={{ style: { fontSize: "40px", width: "200px" } }}
                   InputLabelProps={{ style: { fontSize: "20px" } }}
                 />
               </Box>
@@ -2866,134 +2690,283 @@ export default function DS() {
             mx="60px"
             my="90px"
           >
-            <Box
-              mt="40px"
-              display="flex"
-              gap="10px"
-              sx={{
-                "& > div": {
-                  flexColumn: isNonMobile ? undefined : "span 4",
-                },
-                mx: "80px",
-              }}
-            >
-              <TextField
-                id="lightship"
-                variant="filled"
-                type="number"
-                label="Lightship"
-                onChange={(e) => setLightship(e.target.value)}
-                value={lightship}
-                name="lightship"
-                sx={{
-                  flexColumn: "span 1",
-                  width: "200px",
-                  mx: "40px",
-                }}
-                InputProps={{ style: { fontSize: "40px" } }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                placeholder="total"
-                onChange={(e) => setTotal(e.target.value)}
-                value={Number(total).toFixed(2)}
-                name="total"
-                sx={{ flexColumn: "span 1", width: "180px" }}
-                InputProps={{
-                  style: { fontSize: "40px", color: colors.greenAccent[600] },
-                }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                label="NetLight"
-                onChange={(e) => setNetLight(e.target.value)}
-                value={Number(netLight).toFixed(2)}
-                name="netLight"
-                sx={{ flexColumn: "span 1", width: "200px" }}
-                InputProps={{
-                  style: { fontSize: "40px", color: colors.redAccent[600] },
-                }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                label="Constant"
-                onChange={(e) => setConstant(e.target.value)}
-                value={Number(constant).toFixed(2)}
-                name="constant"
-                sx={{ flexColumn: "span 1", width: "200px" }}
-                InputProps={{
-                  style: { fontSize: "40px", color: colors.greenAccent[600] },
-                }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                mx: "40px",
-                mt: "40px",
-              }}
-            >
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                placeholder="tot Final"
-                onChange={(e) => setTotalFinal(e.target.value)}
-                value={totalFinal}
-                name="totalFinal"
-                sx={{ flexColumn: "span 1", width: "180px" }}
-                InputProps={{
-                  style: {
-                    fontSize: "40px",
-                  },
-                }}
-                InputLabelProps={{
-                  style: {
-                    fontSize: "40px",
-                    color: colors.greenAccent[600],
-                  },
-                }}
-              />
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                label="NetLoad"
-                onChange={(e) => setNetLoad(e.target.value)}
-                value={Number(netLoad).toFixed(2)}
-                name="netLoad"
-                sx={{ flexColumn: "span 2", width: "130px", mx: "40px" }}
-                InputProps={{
-                  style: { fontSize: "40px", color: colors.redAccent[500] },
-                }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
+            {isLoading && (
+              <Box
+                display="flex"
+                flexDirection="row"
+                justifyContent="space-between"
+              >
+                <Box
+                  mt="40px"
+                  display="flex"
+                  gap="10px"
+                  sx={{
+                    "& > div": {
+                      flexColumn: isNonMobile ? undefined : "span 4",
+                    },
+                    mx: "80px",
+                  }}
+                >
+                  <TextField
+                    id="lightship"
+                    variant="filled"
+                    type="number"
+                    label="Lightship"
+                    onChange={(e) => setLightship(e.target.value)}
+                    value={lightship}
+                    name="lightship"
+                    sx={{
+                      flexColumn: "span 1",
+                      width: "200px",
+                      mx: "40px",
+                    }}
+                    InputProps={{ style: { fontSize: "40px" } }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    placeholder="total"
+                    onChange={(e) => setTotal(e.target.value)}
+                    value={Number(total).toFixed(2)}
+                    name="total"
+                    sx={{ flexColumn: "span 1", width: "180px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.greenAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="NetLight"
+                    onChange={(e) => setNetLight(e.target.value)}
+                    value={Number(netLight).toFixed(2)}
+                    name="netLight"
+                    sx={{ flexColumn: "span 1", width: "200px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="Constant"
+                    onChange={(e) => setConstant(e.target.value)}
+                    value={Number(constant).toFixed(2)}
+                    name="constant"
+                    sx={{ flexColumn: "span 1", width: "200px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.greenAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    mx: "40px",
+                    mt: "40px",
+                  }}
+                >
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    placeholder="tot Final"
+                    onChange={(e) => setTotalFinal(e.target.value)}
+                    value={totalFinal}
+                    name="totalFinal"
+                    sx={{ flexColumn: "span 1", width: "180px" }}
+                    InputProps={{
+                      style: {
+                        fontSize: "40px",
+                      },
+                    }}
+                    InputLabelProps={{
+                      style: {
+                        fontSize: "40px",
+                        color: colors.greenAccent[600],
+                      },
+                    }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="NetLoad"
+                    onChange={(e) => setNetLoad(e.target.value)}
+                    value={Number(netLoad).toFixed(2)}
+                    name="netLoad"
+                    sx={{ flexColumn: "span 2", width: "130px", mx: "40px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[500] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
 
-              <TextField
-                disabled
-                variant="outlined"
-                type="number"
-                label="Cargo"
-                onChange={(e) => setCargo(e.target.value)}
-                value={Number(cargo).toFixed(2)}
-                name="cargo"
-                sx={{ flexColumn: "span 2", width: "190px" }}
-                InputProps={{
-                  style: { fontSize: "40px", color: colors.redAccent[500] },
-                }}
-                InputLabelProps={{ style: { fontSize: "20px" } }}
-              />
-            </Box>
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="Cargo"
+                    onChange={(e) => setCargo(e.target.value)}
+                    value={Number(cargo).toFixed(2)}
+                    name="cargo"
+                    sx={{ flexColumn: "span 2", width: "190px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[500] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                </Box>
+              </Box>
+
+            )}
+
+            {isDischarging && (
+              <Box
+                display="flex"
+                flexDirection="row"
+                justifyContent="space-between"
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    mx: "40px",
+                    mt: "40px",
+                  }}
+                >
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    placeholder="tot Final"
+                    onChange={(e) => setTotalFinal(e.target.value)}
+                    value={totalFinal}
+                    name="totalFinal"
+                    sx={{ flexColumn: "span 1", width: "180px" }}
+                    InputProps={{
+                      style: {
+                        fontSize: "40px",
+                      },
+                    }}
+                    InputLabelProps={{
+                      style: {
+                        fontSize: "40px",
+                        color: colors.greenAccent[600],
+                      },
+                    }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="NetLoad"
+                    onChange={(e) => setNetLoad(e.target.value)}
+                    value={Number(netLoad).toFixed(2)}
+                    name="netLoad"
+                    sx={{ flexColumn: "span 2", width: "130px", mx: "40px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[500] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="Cargo"
+                    onChange={(e) => setCargo(e.target.value)}
+                    value={Number(cargo).toFixed(2)}
+                    name="cargo"
+                    sx={{ flexColumn: "span 2", width: "190px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[500] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                </Box>
+                <Box
+                  mt="40px"
+                  display="flex"
+                  gap="10px"
+                  sx={{
+                    "& > div": {
+                      flexColumn: isNonMobile ? undefined : "span 4",
+                    },
+                    mx: "80px",
+                  }}
+                >
+                  <TextField
+                    id="lightship"
+                    variant="filled"
+                    type="number"
+                    label="Lightship"
+                    onChange={(e) => setLightship(e.target.value)}
+                    value={lightship}
+                    name="lightship"
+                    sx={{
+                      flexColumn: "span 1",
+                      width: "200px",
+                      mx: "40px",
+                    }}
+                    InputProps={{ style: { fontSize: "40px" } }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    placeholder="total"
+                    onChange={(e) => setTotal(e.target.value)}
+                    value={Number(total).toFixed(2)}
+                    name="total"
+                    sx={{ flexColumn: "span 1", width: "180px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.greenAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="NetLight"
+                    onChange={(e) => setNetLight(e.target.value)}
+                    value={Number(netLight).toFixed(2)}
+                    name="netLight"
+                    sx={{ flexColumn: "span 1", width: "200px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.redAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                  <TextField
+                    disabled
+                    variant="outlined"
+                    type="number"
+                    label="Constant"
+                    onChange={(e) => setConstant(e.target.value)}
+                    value={Number(constant).toFixed(2)}
+                    name="constant"
+                    sx={{ flexColumn: "span 1", width: "200px" }}
+                    InputProps={{
+                      style: { fontSize: "40px", color: colors.greenAccent[600] },
+                    }}
+                    InputLabelProps={{ style: { fontSize: "20px" } }}
+                  />
+                </Box>
+
+              </Box>
+
+            )}
+
 
             {/**TODO  Insérer ici une section pour les remarques     */}
 
