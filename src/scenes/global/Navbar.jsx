@@ -19,6 +19,7 @@ import { ColorModeContext, tokens } from "../../theme";
 import SearchIcon from "@mui/icons-material/Search";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import FollowTheSignsIcon from "@mui/icons-material/FollowTheSigns";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
@@ -44,6 +45,7 @@ const NavBar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,31 +86,41 @@ const NavBar = () => {
     console.log('Infos User ')
   }
   const handleFaqSubmit = async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
+    e.preventDefault();
 
+    // Vérification de l'authentification
+    if (!auth.currentUser) {
+      alert("Vous devez être connecté pour ajouter une FAQ.");
+      return;
+    }
+    // Verifier si les champs sont remplis
     if (!faqTitle || !faqContent) {
       alert("Veuillez remplir tous les champs.");
       return;
     }
 
-    setLoading(true); // Indique que le chargement est en cours
+    setLoading(true);
 
     try {
-      // Ajoute un document à la collection 'faq'
-      await addDoc(collection(db, 'faq'), {
+      const docRef = await addDoc(collection(db, 'faq'), {
         title: faqTitle,
         content: faqContent,
+        createdBy: auth.currentUser.uid,
+        createdAt: new Date(),
       });
 
+      console.log("Document ajouté avec l'ID: ", docRef.id);
       alert("FAQ ajoutée avec succès !");
-      setFaqTitle(''); // Réinitialise le champ titre
-      setFaqContent(''); // Réinitialise le champ contenu
+
+      // Réinitialisation des champs
+      setFaqTitle('');
+      setFaqContent('');
+      setOpenFaqModal(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout de la FAQ: ", error);
-      alert("Erreur lors de l'ajout de la FAQ.");
+      alert("Erreur lors de l'ajout de la FAQ. Assurez-vous d'être connecté.");
     } finally {
-      setLoading(false); // Indique que le chargement est terminé
-      setOpenFaqModal(false); // Ferme le modal après l'ajout
+      setLoading(false);
     }
   };
 
@@ -146,43 +158,27 @@ const NavBar = () => {
     setOpenSigninModal(false);
   };
 
-  // Get Data from the Firebase:
-  // db.collection('faq').get().then((querySnapshot) => { })
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Attempt to fetch data from the 'faq' collection
-        const querySnapshot = await getDocs(collection(db, 'faq'));
-        console.log(querySnapshot);
-        querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data());
-        });
-      } catch (error) {
-        // Log a more descriptive error message
-        console.error("Erreur lors de la récupération des données : Vérifiez les permissions de Firebase.", error);
-      }
-    };
 
-    fetchData();
-  }, []);
 
 
   // Listen for auth status changes: 
   // chaque fois que l'authentification change logged or not 
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log("User logged in:", user);
-      //  redirect the user or update the UI
-      // setOpenSigninModal(true);
-      setLoading(false);
-    } else {
-      console.log("User logged out");
-      //  redirect the user or update the UI
-      // setOpenSigninModal(true);
-      setLoading(false);
-    }
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("User logged in:", user);
+        setIsAuthenticated(true);
+        setLoading(false);
+      } else {
+        console.log("User logged out");
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    });
 
-  })
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
 
 
@@ -190,10 +186,8 @@ const NavBar = () => {
     auth.signOut()
       .then(() => {
         console.log('User logged out successfully');
-        //  redirect the user or update the UI
-        // setOpenSigninModal(true);
+        setIsAuthenticated(false);
         setLoading(false);
-
       })
       .catch((error) => {
         console.error('Error logging out:', error);
@@ -237,6 +231,27 @@ const NavBar = () => {
       });
   };
 
+  // Get Data from the Firebase:
+  // db.collection('faq').get().then((querySnapshot) => { })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Attempt to fetch data from the 'faq' collection
+        const querySnapshot = await getDocs(collection(db, 'faq'));
+        console.log(querySnapshot);
+        querySnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data());
+        });
+      } catch (error) {
+        // Log a more descriptive error message
+        console.error("Erreur lors de la récupération des données : Vérifiez les permissions de Firebase.", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
       {/**Search Bar Left */}
@@ -260,39 +275,47 @@ const NavBar = () => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton
-          to="#"
-          className="logged-out"
-          onClick={handleOpenSigninModal}
-        >
-          <FollowTheSignsIcon />
-        </IconButton>
-        <IconButton
-          to="#"
-          className="logged-out"
-          onClick={handleOpenLoginModal}
-        >
-          <ExitToAppIcon />
-        </IconButton>
-        <IconButton to="#" className="logged-in" onClick={handleLogout}>
-          <LogoutIcon />
-        </IconButton>
-        <IconButton
-          to="#"
-          className="logged-in"
-          onClick={handleOpenAccountModal}
-        >
-          <ManageAccountsIcon />
-        </IconButton>
 
-        <IconButton to="#" className="logged-in" onClick={handleOpenFaqModal}>
-          <AddCardIcon />
-        </IconButton>
-        <Link to="/ds"> {/* Utilisez Link pour naviguer */}
-          <IconButton>
-            <DeblurIcon />
-          </IconButton>
-        </Link>
+        {/* Afficher ces boutons seulement si NON authentifié */}
+        {!isAuthenticated && (
+          <>
+            <IconButton
+              to="#"
+              onClick={handleOpenSigninModal}
+            >
+              <FollowTheSignsIcon />
+            </IconButton>
+            <IconButton
+              to="#"
+              onClick={handleOpenLoginModal}
+            >
+              <ExitToAppIcon />
+            </IconButton>
+          </>
+        )}
+
+        {/* Afficher ces boutons seulement si authentifié */}
+        {isAuthenticated && (
+          <>
+            <IconButton to="#" onClick={handleLogout}>
+              <LogoutIcon />
+            </IconButton>
+            <IconButton
+              to="#"
+              onClick={handleOpenAccountModal}
+            >
+              <ManageAccountsIcon />
+            </IconButton>
+            <IconButton to="#" onClick={handleOpenFaqModal}>
+              <AddCardIcon />
+            </IconButton>
+            <Link to="/ds">
+              <IconButton>
+                <DeblurIcon />
+              </IconButton>
+            </Link>
+          </>
+        )}
       </Box>
       {/* Modals */}
       <Box id="modal-login" className="modal">
@@ -520,93 +543,71 @@ const NavBar = () => {
           open={openFaqModal}
           onClose={handleCloseFaqModal}
           aria-labelledby="modal-title"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '10px',
+          }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "20px",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: colors.grey[700],
-              boxShadow: 24,
-              borderRadius: "10px",
-              p: 4,
-              width: "500px",
-              height: "400px",
-            }}
-          >
-            <Typography variant="h3" id="modal-title" margin="normal">
-              FAQ
-            </Typography>
-            <form onSubmit={handleFaqSubmit} id="faq-form">
-              <Stack spacing={2} sx={{ width: "300px" }}>
-                <TextField
-                  type="text"
-                  id="faq-title"
-                  label="Title"
-                  placeholder="Faq title"
-                  variant="outlined"
-                  onChange={handleTitleChange}
-                  value={faqTitle}
-                  disabled={false}
-                  required
-                  sx={{ fontSize: "30px" }}
-                  InputProps={{ readOnly: false }}
-                />
-                <TextField
-                  id="faq-content"
-                  placeholder="Content"
-                  label="Contente"
-                  variant="outlined"
-                  onChange={handleContentChange}
-                  value={faqContent}
-                  disabled={false}
-                  required
-                  multiline // This makes the TextField behave like a textarea
-                  rows={4} // You can adjust the number of visible rows
-                  sx={{ fontSize: "30px" }}
-                  InputProps={{ readOnly: false }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  onClick={handleFaqSubmit}
-
-                  sx={{
-                    color: colors.grey[100],
-                    backgroundColor: colors.blueAccent[700],
-                    "&:disabled": {
-                      backgroundColor: colors.blueAccent[900],
-                      color: colors.grey[300],
-                    },
-                    display: 'flex', // Align icon and text
-                    alignItems: 'center', // Center vertically
-                  }}
-                >
-
-                  {loading ? "Send To DB..." : "Send To DB"}
-                </Button>
-
-                {error && (
-                  <Box
+          <Grid>
+            <Paper elevation={10} style={stylePaper}>
+              <Grid align="center">
+                <Avatar style={stylingAvatar}>
+                  <PostAddIcon />
+                </Avatar>
+                <Typography variant="h2" id="modal-title" margin="normal">
+                  FAQ
+                </Typography>
+              </Grid>
+              <form onSubmit={handleFaqSubmit} id="faq-form">
+                <Stack spacing={4} sx={{ width: "100%", marginTop: "80px" }}>
+                  <TextField
+                    type="text"
+                    id="title"
+                    value={faqTitle}
+                    onChange={(e) => setFaqTitle(e.target.value)}
+                    disabled={loading}
+                    label="Title"
+                    fullWidth
+                    variant="standard"
+                    sx={{ fontSize: "30px" }}
+                  />
+                  <TextField
+                    type="text"
+                    id="content"
+                    value={faqContent}
+                    onChange={(e) => setFaqContent(e.target.value)}
+                    disabled={loading}
+                    label="Content"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    variant="standard"
+                    sx={{ fontSize: "30px" }}
+                    InputProps={{ readOnly: false }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loading}
                     sx={{
-                      color: colors.redAccent[500],
-                      textAlign: "center",
-                      marginTop: 1,
+                      color: colors.grey[100],
+                      backgroundColor: colors.blueAccent[700],
+                      "&:disabled": {
+                        backgroundColor: colors.blueAccent[900],
+                        color: colors.grey[300],
+                      },
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
                   >
-                    {error}
-                  </Box>
-                )}
-              </Stack>
-            </form>
-          </Box>
+                    {loading ? "Adding to DB..." : "Add To DB"}
+                  </Button>
+                </Stack>
+              </form>
+            </Paper>
+          </Grid>
         </Modal>
       </Box>
     </Box >

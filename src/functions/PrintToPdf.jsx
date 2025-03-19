@@ -1,10 +1,17 @@
 import { useState } from "react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import Box from "@mui/material/Box";
+import { Button } from "@mui/material";
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import { tokens } from "../theme";
+import { useTheme } from "@mui/material";
+
 
 export default function PrintToPdf() {
   const [isLoader, setIsLoader] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
 
   const handleDownload = () => {
     const capturePage = document.querySelector("#printMe");
@@ -41,30 +48,43 @@ export default function PrintToPdf() {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center" // Centre le contenu horizontalement
-      alignItems="center" // Centre le contenu verticalement
-      mt={2} // Marge supérieure
-      mb={2} // Marge inférieure
+    <Button
+      variant="contained"
+      onClick={handleDownload}
+      disabled={isLoader}
+      startIcon={<PrintOutlinedIcon />}
       sx={{
-        // Styles supplémentaires
-        padding: "25px", // Espacement interne
-        backgroundColor: "rgb(255, 165, 0)", // Couleur de fond
-        borderRadius: "8px", // Coins arrondis
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        border: "2px solid #1976d2",
-        cursor: "pointer",
-        transition: "background-color 0.3s ease",
-        "&:hover": {
-          backgroundColor: "#e0e0e0",
+        mt: 2,
+        backgroundColor: colors.greenAccent[200],
+        color: colors.grey[700],
+        '&:hover': {
+          backgroundColor: colors.greenAccent[600],
         },
+        padding: "10px 20px",
+        borderRadius: "8px",
+        textTransform: "none", // Empêche les majuscules automatiques
+        fontSize: "16px",
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1, // Espace entre l'icône et le texte
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.3s ease',
+        '&:disabled': {
+          backgroundColor: colors.grey[500],
+          opacity: 0.7,
+        }
       }}
     >
-      <button onClick={handleDownload} disabled={isLoader}>
-        {isLoader ? "Téléchargement..." : "Télécharger PDF"}
-      </button>
-      {isLoader && <span>Chargement en cours...</span>}
-    </Box>
+      {isLoader ? (
+        <>
+          <span>Téléchargement...</span>
+        </>
+      ) : (
+        <>
+          Télécharger PDF
+        </>
+      )}
+    </Button>
+
   );
 }

@@ -1,7 +1,22 @@
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Grid } from '@mui/material';
+import PrintToPdf from "./../functions/PrintToPdf";
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import BackupOutlinedIcon from '@mui/icons-material/BackupOutlined';
+import { styled } from '@mui/system';
+import { useTheme } from '@mui/material/styles';
+import { tokens } from '../theme';
 
 const Infos = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  // Créer un composant Button personnalisé qui sera caché à l'impression
+  const NonPrintableButton = styled(Button)`
+@media print {
+  display: none !important;
+}
+`;
   // État pour stocker les valeurs des champs
   const [nationality, setNationality] = useState('');
   const [portOfRegistration, setPortOfRegistration] = useState('');
@@ -46,6 +61,28 @@ const Infos = () => {
       finalSurveyCompleted,
       vesselDeparted,
     });
+  };
+
+  // Fonction pour effacer les champs remplis:
+  const handleClear = () => {
+    setNationality('');
+    setPortOfRegistration('');
+    setVessel('');
+    setCargo('');
+    setPort('');
+    setPortOfLoading('');
+    setPortOfDischarging('');
+    setBlWeight('');
+    setBlDate('');
+    setVesselArrived('');
+    setVesselBerthed('');
+    setInitialSurveyCommenced('');
+    setInitialSurveyCompleted('');
+    setOperationCommenced('');
+    setOperationCompleted('');
+    setFinalSurveyCommenced('');
+    setFinalSurveyCompleted('');
+    setVesselDeparted('');
   };
 
   return (
@@ -228,9 +265,83 @@ const Infos = () => {
             />
           </Grid>
         </Grid>
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-          Soumettre
-        </Button>
+        <Grid
+          container
+          spacing={2} // Espacement entre les éléments
+          sx={{
+            display: 'flex',
+            flexDirection: 'row', // Aligne les éléments horizontalement
+            justifyContent: 'space-between', // Espace les éléments uniformément
+            alignItems: 'center',
+            mt: 2, // Marge en haut
+            width: '100%' // Assure que la Grid prend toute la largeur
+          }}
+        >
+          <Grid item>
+            <NonPrintableButton
+              variant="contained"
+              startIcon={<CancelOutlinedIcon />}
+              sx={{
+                backgroundColor: colors.blueAccent[200],
+                color: colors.grey[700],
+                '&:hover': {
+                  backgroundColor: colors.blueAccent[600],
+                },
+                padding: "10px 20px",
+                borderRadius: "8px",
+                textTransform: "none",
+                fontSize: "16px",
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:disabled': {
+                  backgroundColor: colors.grey[500],
+                  opacity: 0.7,
+                }
+              }}
+              onClick={handleClear}
+            >
+              Effacer
+            </NonPrintableButton>
+          </Grid>
+
+          <Grid item>
+            <NonPrintableButton
+              type="submit"
+              variant="contained"
+              startIcon={<BackupOutlinedIcon />}
+              sx={{
+                backgroundColor: colors.redAccent[200],
+                color: colors.grey[700],
+                '&:hover': {
+                  backgroundColor: colors.redAccent[600],
+                },
+                padding: "10px 20px",
+                borderRadius: "8px",
+                textTransform: "none",
+                fontSize: "16px",
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:disabled': {
+                  backgroundColor: colors.grey[500],
+                  opacity: 0.7,
+                }
+              }}
+            >
+              Soumettre
+            </NonPrintableButton>
+          </Grid>
+
+          <Grid item>
+            <PrintToPdf />
+          </Grid>
+        </Grid>
+
       </form>
     </Box>
   );
