@@ -265,6 +265,13 @@ const Infos = () => {
             />
           </Grid>
         </Grid>
+        <Box
+          sx={{
+            mt: "10px",
+            borderBottom: "5px solid",
+            color: colors.blueAccent[200],
+          }}
+        ></Box>
         <Grid
           container
           spacing={2} // Espacement entre les éléments
@@ -340,7 +347,16 @@ const Infos = () => {
           <Grid item>
             <PrintToPdf />
           </Grid>
+
+
         </Grid>
+        <Box
+          sx={{
+            mt: "10px",
+            borderBottom: "5px solid",
+            color: colors.greenAccent[500],
+          }}
+        ></Box>
 
       </form>
     </Box>

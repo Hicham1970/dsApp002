@@ -932,10 +932,21 @@ export default function DS() {
         <Grid container spacing={3}>
           {/**INITIAL */}
 
-          <Grid item xs={12}>
-            <Grid item xs={2}>
+          <Grid container
+            direction="row"  // Force l'alignement horizontal
+            spacing={3}      // Augmente l'espacement entre les éléments
+            sx={{
+              display: 'flex',
+              justifyContent: 'center', // Aligne les éléments depuis le début
+              alignItems: 'center',
+              mt: 4,
+              gap: 4,        // Ajoute un espacement supplémentaire entre les éléments
+
+            }}>
+            <Grid  >
+
               <TextField
-                fullWidth
+                sx={{ width: "130px" }}
                 variant="filled"
                 type="number"
                 label="Lbp"
@@ -943,6 +954,81 @@ export default function DS() {
                 onChange={(e) => setLbp(e.target.value)}
               />
             </Grid>
+            {/**CheckBox pour choisir le type de draft: Loading or Discharging */}
+            <Grid item xs={6} sm={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isLoading}
+                    onChange={(e) => {
+                      setIsLoading(e.target.checked);
+                      if (e.target.checked) {
+                        setIsDischarging(false);
+                      }
+                    }}
+                    sx={{
+                      color: colors.greenAccent[500], // Couleur par défaut
+                      '&.Mui-checked': {
+                        color: colors.greenAccent[800], // Couleur quand coché
+                      },
+                      '& .MuiSvgIcon-root': {
+                        fontSize: 28, // Taille de l'icône
+                      },
+                      '&:hover': {
+                        backgroundColor: colors.greenAccent[200], // Effet hover
+                      },
+                    }}
+                  />
+                }
+                label="Loading"
+                sx={{
+                  '& .MuiFormControlLabel-label': {
+                    fontSize: '1rem',
+                    fontWeight: isLoading ? 600 : 400,
+                    color: isLoading ? colors.greenAccent[700] : 'text.primary',
+                    transition: 'all 0.2s ease-in-out',
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={6} sm={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={!isLoading}
+                    onChange={(e) => {
+                      setIsLoading(!e.target.checked);
+                      if (e.target.checked) {
+                        setIsLoading(false);
+                      }
+                    }}
+                    sx={{
+                      color: colors.greenAccent[500], // Couleur par défaut
+                      '&.Mui-checked': {
+                        color: colors.greenAccent[700], // Couleur quand coché
+                      },
+                      '& .MuiSvgIcon-root': {
+                        fontSize: 28, // Taille de l'icône
+                      },
+                      '&:hover': {
+                        backgroundColor: colors.greenAccent[200], // Effet hover
+                      },
+                    }}
+                  />
+                }
+                label="Discharging"
+                sx={{
+                  '& .MuiFormControlLabel-label': {
+                    fontSize: '1rem',
+                    fontWeight: !isLoading ? 600 : 400,
+                    color: !isLoading ? colors.greenAccent[700] : 'text.primary',
+                    transition: 'all 0.2s ease-in-out',
+                  },
+                }}
+              />
+            </Grid>
+
           </Grid>
           <Grid item xs={12} md={6}>
             {/* Debut de la partie Initial */}
@@ -1547,27 +1633,55 @@ export default function DS() {
                     onChange={(e) => setTotal(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={4} sm={2}>
-                  <TextField
-                    sx={{ width: "100px" }}
-                    disabled
-                    variant="standard"
-                    label="Net Light"
-                    value={netLight}
-                    onChange={(e) => setNetLight(e.target.value)}
-                  />
-                </Grid>
+                {!isLoading ? ( // Inversé la condition pour plus de clarté logique
+                  <>
+                    <Grid item xs={4} sm={2}>
+                      <TextField
+                        sx={{ width: "100px" }}
+                        disabled
+                        variant="standard"
+                        label="Net Load"
+                        value={netLoad}
+                        onChange={(e) => setNetLoad(e.target.value)}
+                      />
+                    </Grid>
 
-                <Grid item xs={4} sm={2}>
-                  <TextField
-                    sx={{ width: "100px" }}
-                    disabled
-                    variant="standard"
-                    label="Constant"
-                    value={constant}
-                    onChange={(e) => setConstant(e.target.value)}
-                  />
-                </Grid>
+                    <Grid item xs={4} sm={2}>
+                      <TextField
+                        sx={{ width: "100px" }}
+                        disabled
+                        variant="standard"
+                        label="Cargo + Cst"
+                        value={cargo}
+                        onChange={(e) => setCargo(e.target.value)}
+                      />
+                    </Grid>
+                  </>
+                ) : ( // Si isLoading est true
+                  <>
+                    <Grid item xs={4} sm={2}>
+                      <TextField
+                        sx={{ width: "100px" }}
+                        disabled
+                        variant="standard"
+                        label="Net Light"
+                        value={netLight}
+                        onChange={(e) => setNetLight(e.target.value)}
+                      />
+                    </Grid>
+
+                    <Grid item xs={4} sm={2}>
+                      <TextField
+                        sx={{ width: "100px" }}
+                        disabled
+                        variant="standard"
+                        label="Constant"
+                        value={constant}
+                        onChange={(e) => setConstant(e.target.value)}
+                      />
+                    </Grid>
+                  </>
+                )}
               </Grid>
             </Grid>
 
@@ -2198,7 +2312,7 @@ export default function DS() {
             </Grid>
 
 
-            {/**Fin de la partie Initial */}
+
 
           </Grid>
         </Grid>
@@ -2209,7 +2323,7 @@ export default function DS() {
             color: colors.blueAccent[200],
           }}
         ></Box>
-      </Box>
+      </Box >
 
       <Footer />
     </>
