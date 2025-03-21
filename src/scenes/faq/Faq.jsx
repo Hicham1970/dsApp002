@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Box, Typography, useTheme } from "@mui/material";
 import Header from "../../components/Header";
 import Accordion from "@mui/material/Accordion";
@@ -7,26 +8,15 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { tokens } from "../../theme";
 import { useState, useEffect } from "react";
 import { collection, getDocs } from 'firebase/firestore';
-import { auth, db } from '../../firebase'; // Ajout de l'import de auth
+import { auth, db } from '../../firebase';
+import LoadingPage from '../loadingPage';
 
 export default function Faq() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [faqs, setFaqs] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setIsAuthenticated(true);
-        fetchFaqs(); // Fonction pour récupérer les FAQs
-      } else {
-        setIsAuthenticated(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const [loading, setLoading] = useState(true);
 
   const fetchFaqs = async () => {
     try {
@@ -40,6 +30,26 @@ export default function Faq() {
       console.error("Erreur lors de la récupération des FAQs:", error);
     }
   };
+
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user);
+      setLoading(false);
+
+      if (user) {
+        setIsAuthenticated(true);
+        fetchFaqs(); // Fonction pour récupérer les FAQs
+      } else {
+        setIsAuthenticated(false);
+        return <LoadingPage />;
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+
 
   if (!isAuthenticated) {
     return (

@@ -14,6 +14,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import Modal from "@mui/material/Modal";
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import SearchIcon from "@mui/icons-material/Search";
@@ -46,6 +47,7 @@ const NavBar = () => {
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -188,6 +190,7 @@ const NavBar = () => {
         console.log('User logged out successfully');
         setIsAuthenticated(false);
         setLoading(false);
+        navigate('/');
       })
       .catch((error) => {
         console.error('Error logging out:', error);
@@ -342,7 +345,7 @@ const NavBar = () => {
                 </Typography>
               </Grid>
               <form onSubmit={handleLoginSubmit} id="login-form">
-                <Stack spacing={2} sx={{ width: "100%", marginTop: "80px" }}>
+                <Stack spacing={2} sx={{ width: "100%", marginTop: "20px" }}>
                   <TextField
                     type="email"
                     id="login-email"
@@ -422,7 +425,7 @@ const NavBar = () => {
                   </Typography>
                 </Grid>
                 <form onSubmit={handleSignupSubmit} id="signup-form">
-                  <Stack spacing={2} sx={{ width: "100%", marginTop: "80px" }}>
+                  <Stack spacing={2} sx={{ width: "100%", marginTop: "20px" }}>
                     <TextField
                       type="email"
                       id="signup-email"
@@ -502,7 +505,7 @@ const NavBar = () => {
                 </Typography>
               </Grid>
               <form onSubmit={handleAccountSubmit} id="Account-form">
-                <Stack spacing={2} sx={{ width: "100%", marginTop: "80px" }}>
+                <Stack spacing={2} sx={{ width: "100%", marginTop: "20px" }}>
                   <TextField
                     type="text"
                     id="account"

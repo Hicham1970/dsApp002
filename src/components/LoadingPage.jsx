@@ -46,7 +46,7 @@ const LoadingPage = () => {
         display="flex"
         flexDirection="column"
         gap={2}
-        sx={{ padding: "20px" }}
+
         justifyContent="center"
         alignItems="center"
         minHeight="100vh"
