@@ -136,7 +136,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 16,
-    "DRAFT": 5.49999999999999,
+    "DRAFT": 5.5,
     "DISPLACEMENT": 22609,
     "TPC": 45.9,
     "MTC": 500.6,
@@ -145,7 +145,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 17,
-    "DRAFT": 5.59999999999999,
+    "DRAFT": 5.6,
     "DISPLACEMENT": 23069,
     "TPC": 46.1,
     "MTC": 504.6,
@@ -154,7 +154,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 18,
-    "DRAFT": 5.69999999999999,
+    "DRAFT": 5.7,
     "DISPLACEMENT": 23531,
     "TPC": 46.2,
     "MTC": 508.8,
@@ -163,7 +163,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 19,
-    "DRAFT": 5.79999999999999,
+    "DRAFT": 5.8,
     "DISPLACEMENT": 23993,
     "TPC": 46.3,
     "MTC": 512.9,
@@ -172,7 +172,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 20,
-    "DRAFT": 5.89999999999999,
+    "DRAFT": 5.9,
     "DISPLACEMENT": 24457,
     "TPC": 46.5,
     "MTC": 517.1,
@@ -181,7 +181,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 21,
-    "DRAFT": 5.99999999999999,
+    "DRAFT": 6.0,
     "DISPLACEMENT": 24923,
     "TPC": 46.6,
     "MTC": 521.4,
@@ -190,7 +190,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 22,
-    "DRAFT": 6.09999999999999,
+    "DRAFT": 6.10,
     "DISPLACEMENT": 25389,
     "TPC": 46.7,
     "MTC": 525.7,
@@ -199,7 +199,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 23,
-    "DRAFT": 6.19999999999999,
+    "DRAFT": 6.2,
     "DISPLACEMENT": 25857,
     "TPC": 46.9,
     "MTC": 530.1,
@@ -208,7 +208,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 24,
-    "DRAFT": 6.29999999999999,
+    "DRAFT": 6.3,
     "DISPLACEMENT": 26326,
     "TPC": 47,
     "MTC": 534.4,
@@ -217,7 +217,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 25,
-    "DRAFT": 6.39999999999999,
+    "DRAFT": 6.4,
     "DISPLACEMENT": 26797,
     "TPC": 47.1,
     "MTC": 538.7,
@@ -226,7 +226,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 26,
-    "DRAFT": 6.49999999999999,
+    "DRAFT": 6.5,
     "DISPLACEMENT": 27269,
     "TPC": 47.2,
     "MTC": 543,
@@ -235,7 +235,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 27,
-    "DRAFT": 6.59999999999999,
+    "DRAFT": 6.6,
     "DISPLACEMENT": 27742,
     "TPC": 47.4,
     "MTC": 547.2,
@@ -244,7 +244,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 28,
-    "DRAFT": 6.69999999999999,
+    "DRAFT": 6.7,
     "DISPLACEMENT": 28216,
     "TPC": 47.5,
     "MTC": 551.4,
@@ -253,7 +253,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 29,
-    "DRAFT": 6.79999999999999,
+    "DRAFT": 6.8,
     "DISPLACEMENT": 28691,
     "TPC": 47.6,
     "MTC": 555.6,
@@ -262,7 +262,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 30,
-    "DRAFT": 6.89999999999999,
+    "DRAFT": 6.9,
     "DISPLACEMENT": 29168,
     "TPC": 47.7,
     "MTC": 559.7,
@@ -271,7 +271,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 31,
-    "DRAFT": 6.99999999999999,
+    "DRAFT": 7.0,
     "DISPLACEMENT": 29646,
     "TPC": 47.9,
     "MTC": 563.9,
@@ -280,7 +280,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 32,
-    "DRAFT": 7.09999999999999,
+    "DRAFT": 7.10,
     "DISPLACEMENT": 30125,
     "TPC": 48,
     "MTC": 568.1,
@@ -289,7 +289,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 33,
-    "DRAFT": 7.19999999999999,
+    "DRAFT": 7.20,
     "DISPLACEMENT": 30606,
     "TPC": 48.1,
     "MTC": 572.3,
@@ -298,7 +298,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 34,
-    "DRAFT": 7.29999999999999,
+    "DRAFT": 7.30,
     "DISPLACEMENT": 31087,
     "TPC": 48.2,
     "MTC": 576.4,
@@ -307,7 +307,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 35,
-    "DRAFT": 7.39999999999999,
+    "DRAFT": 7.40,
     "DISPLACEMENT": 31570,
     "TPC": 48.3,
     "MTC": 580.5,
@@ -316,7 +316,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 36,
-    "DRAFT": 7.49999999999999,
+    "DRAFT": 7.50,
     "DISPLACEMENT": 32054,
     "TPC": 48.5,
     "MTC": 584.7,
@@ -325,7 +325,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 37,
-    "DRAFT": 7.59999999999999,
+    "DRAFT": 7.60,
     "DISPLACEMENT": 32539,
     "TPC": 48.6,
     "MTC": 588.8,
@@ -334,7 +334,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 38,
-    "DRAFT": 7.69999999999999,
+    "DRAFT": 7.70,
     "DISPLACEMENT": 33025,
     "TPC": 48.7,
     "MTC": 594.3,
@@ -343,7 +343,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 39,
-    "DRAFT": 7.79999999999999,
+    "DRAFT": 7.80,
     "DISPLACEMENT": 33513,
     "TPC": 48.9,
     "MTC": 598.3,
@@ -352,7 +352,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 40,
-    "DRAFT": 7.89999999999999,
+    "DRAFT": 7.90,
     "DISPLACEMENT": 34003,
     "TPC": 49,
     "MTC": 602.3,
@@ -361,7 +361,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 41,
-    "DRAFT": 7.99999999999999,
+    "DRAFT": 8.00,
     "DISPLACEMENT": 34493,
     "TPC": 49.1,
     "MTC": 606.1,
@@ -370,7 +370,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 42,
-    "DRAFT": 8.09999999999999,
+    "DRAFT": 8.10,
     "DISPLACEMENT": 34984,
     "TPC": 49.2,
     "MTC": 610,
@@ -379,7 +379,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 43,
-    "DRAFT": 8.19999999999999,
+    "DRAFT": 8.20,
     "DISPLACEMENT": 35477,
     "TPC": 49.3,
     "MTC": 613.8,
@@ -388,7 +388,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 44,
-    "DRAFT": 8.29999999999998,
+    "DRAFT": 8.30,
     "DISPLACEMENT": 35970,
     "TPC": 49.4,
     "MTC": 617.7,
@@ -397,7 +397,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 45,
-    "DRAFT": 8.39999999999998,
+    "DRAFT": 8.40,
     "DISPLACEMENT": 36464,
     "TPC": 49.5,
     "MTC": 621.4,
@@ -406,7 +406,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 46,
-    "DRAFT": 8.49999999999998,
+    "DRAFT": 8.50,
     "DISPLACEMENT": 36960,
     "TPC": 49.6,
     "MTC": 625.3,
@@ -415,7 +415,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 47,
-    "DRAFT": 8.59999999999998,
+    "DRAFT": 8.60,
     "DISPLACEMENT": 37457,
     "TPC": 49.7,
     "MTC": 629,
@@ -424,7 +424,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 48,
-    "DRAFT": 8.69999999999998,
+    "DRAFT": 8.70,
     "DISPLACEMENT": 37954,
     "TPC": 49.8,
     "MTC": 632.8,
@@ -433,7 +433,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 49,
-    "DRAFT": 8.79999999999998,
+    "DRAFT": 8.80,
     "DISPLACEMENT": 38453,
     "TPC": 49.9,
     "MTC": 636.5,
@@ -442,7 +442,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 50,
-    "DRAFT": 8.89999999999998,
+    "DRAFT": 8.90,
     "DISPLACEMENT": 38952,
     "TPC": 50,
     "MTC": 640.2,
@@ -451,7 +451,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 51,
-    "DRAFT": 8.99999999999998,
+    "DRAFT": 9.00,
     "DISPLACEMENT": 39453,
     "TPC": 50.1,
     "MTC": 644,
@@ -460,7 +460,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 52,
-    "DRAFT": 9.09999999999998,
+    "DRAFT": 9.10,
     "DISPLACEMENT": 39954,
     "TPC": 50.2,
     "MTC": 647.6,
@@ -469,7 +469,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 53,
-    "DRAFT": 9.19999999999998,
+    "DRAFT": 9.20,
     "DISPLACEMENT": 40457,
     "TPC": 50.3,
     "MTC": 650.7,
@@ -478,7 +478,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 54,
-    "DRAFT": 9.29999999999998,
+    "DRAFT": 9.30,
     "DISPLACEMENT": 40960,
     "TPC": 50.4,
     "MTC": 653.7,
@@ -487,7 +487,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 55,
-    "DRAFT": 9.39999999999998,
+    "DRAFT": 9.40,
     "DISPLACEMENT": 41464,
     "TPC": 50.4,
     "MTC": 656.3,
@@ -496,7 +496,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 56,
-    "DRAFT": 9.49999999999998,
+    "DRAFT": 9.50,
     "DISPLACEMENT": 41969,
     "TPC": 50.5,
     "MTC": 658.7,
@@ -505,7 +505,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 57,
-    "DRAFT": 9.59999999999998,
+    "DRAFT": 9.60,
     "DISPLACEMENT": 42474,
     "TPC": 50.6,
     "MTC": 661,
@@ -514,7 +514,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 58,
-    "DRAFT": 9.69999999999998,
+    "DRAFT": 9.70,
     "DISPLACEMENT": 42980,
     "TPC": 50.6,
     "MTC": 663,
@@ -523,7 +523,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 59,
-    "DRAFT": 9.79999999999998,
+    "DRAFT": 9.80,
     "DISPLACEMENT": 43487,
     "TPC": 50.7,
     "MTC": 664.9,
@@ -532,7 +532,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 60,
-    "DRAFT": 9.89999999999998,
+    "DRAFT": 9.90,
     "DISPLACEMENT": 43994,
     "TPC": 50.7,
     "MTC": 666.7,
@@ -541,7 +541,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 61,
-    "DRAFT": 9.99999999999998,
+    "DRAFT": 10.00,
     "DISPLACEMENT": 44501,
     "TPC": 50.8,
     "MTC": 668.3,
@@ -550,7 +550,7 @@ export const hydrostatic_table = [
   },
   {
     "id": 62,
-    "DRAFT": 10.1,
+    "DRAFT": 10.10,
     "DISPLACEMENT": 45009,
     "TPC": 50.8,
     "MTC": 669.8,

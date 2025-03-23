@@ -25,6 +25,7 @@ import FollowTheSignsIcon from "@mui/icons-material/FollowTheSigns";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import LogoutIcon from "@mui/icons-material/Logout";
+import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
 import DS, { Ds } from "../../components/DS"
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DeblurIcon from "@mui/icons-material/Deblur";
@@ -315,6 +316,11 @@ const NavBar = () => {
             <Link to="/ds">
               <IconButton>
                 <DeblurIcon />
+              </IconButton>
+            </Link>
+            <Link to="/filteringTable">
+              <IconButton>
+                <TableRestaurantIcon />
               </IconButton>
             </Link>
           </>

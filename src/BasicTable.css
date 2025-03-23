@@ -1,0 +1,185 @@
+/* Ajustement du conteneur principal */
+.table-container {
+  position: relative;
+  margin: 20px;
+  overflow: auto;
+  max-height: 90vh; /* Hauteur maximale du conteneur */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: var(--primary-bg);
+}
+
+/* Style de la table */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 600px;
+}
+
+/* Header fixe */
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--greenAccent-600);
+}
+
+/* Footer fixe */
+tfoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background-color: var(--primary-400);
+  border-top: 2px solid var(--greenAccent-500);
+}
+/* Bordures pour les cellules */
+th,
+td {
+  padding: 16px 20px;
+  transition: color 0.2s ease;
+  border: 1px solid var(--grey-800); /* Bordure par défaut */
+}
+/* Assurer que le footer et le header sont toujours visibles */
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--greenAccent-600);
+  z-index: 3;
+  border-top: 2px solid var(--greenAccent-600);
+  border-bottom: 2px solid var(--greenAccent-600);
+}
+
+tfoot td {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--primary-400);
+  z-index: 3;
+  padding: 12px 15px;
+  font-weight: bold;
+  color: var(--grey-100);
+  border-top: 2px solid var(--greenAccent-500);
+  border-bottom: 2px solid var(--greenAccent-500);
+}
+
+/* Effet d'ombre pour indiquer le défilement */
+.table-container::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
+}
+
+/* Ajuster le corps de la table */
+tbody {
+  position: relative;
+  z-index: 1;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+th,
+td {
+  padding: 16px 20px;
+  height: 50px; /* Hauteur fixe */
+}
+
+/* Style pour les lignes du corps du tableau */
+tbody tr {
+  transition: all 0.2s ease;
+  background-color: var(--primary-bg); /* Couleur de fond par défaut */
+}
+
+/* Style pour les lignes au survol */
+tbody tr:hover {
+  background-color: var(--primary-600);
+  cursor: pointer;
+}
+
+/* Style pour la première ligne */
+tbody tr:first-child {
+  background-color: var(--primary-bg); /* Utilise la couleur de fond primaire */
+}
+
+/* Style pour la première ligne au survol */
+tbody tr:first-child:hover {
+  background-color: var(--primary-600);
+}
+
+/* Animation du footer lors du défilement */
+@media (min-width: 768px) {
+  tfoot {
+    transition: transform 0.3s ease;
+  }
+
+  .table-container:not(:hover) tfoot {
+    transform: translateY(100%);
+  }
+
+  .table-container:hover tfoot {
+    transform: translateY(0);
+  }
+}
+
+/* Assurer que le contenu du footer reste lisible */
+tfoot tr {
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Gérer l'espace pour le défilement */
+.table-container {
+  scrollbar-gutter: stable;
+}
+
+/* Amélioration du contraste pour le texte */
+td,
+th {
+  transition: color 0.2s ease;
+}
+
+/* Supprimer la bordure droite du dernier élément de chaque ligne */
+tr > *:last-child {
+  border-right: none;
+}
+
+/* Supprimer la bordure gauche du premier élément de chaque ligne */
+tr > *:first-child {
+  border-left: none;
+}
+/* Supprimer la bordure inférieure de la dernière ligne du tbody */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Ajustements pour le mode clair */
+@media (prefers-color-scheme: light) {
+  /* Suppression de l'alternance des couleurs */
+  tbody tr {
+    background-color: var(--primary-bg); /* Couleur de fond unique */
+  }
+
+  tbody tr:hover {
+    background-color: var(--primary-300); /* Couleur au survol en mode clair */
+  }
+  tbody tr:first-child:hover {
+    background-color: var(
+      --primary-300
+    ); /* Couleur au survol pour la première ligne */
+  }
+
+  /* Bordures plus claires en mode clair */
+  th,
+  td {
+    border-color: var(--grey-200);
+  }
+}

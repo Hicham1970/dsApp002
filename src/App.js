@@ -10,6 +10,9 @@ import DSComponent from "./scenes/ds";
 import TopBar from "./scenes/global/TopBar";
 import Navbar from "./scenes/global/Navbar";
 import LoadingPage from "./scenes/loadingPage";
+import BasicTableComponent from "./scenes/basicTable";
+import SortingTableComponent from "./scenes/sortingTable";
+import FilteringTableComponent from "./scenes/filteringTable";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -26,7 +29,9 @@ function App() {
             <Routes>
               <Route path="/" element={<LoadingPage />} />
               <Route path="/ds" element={<DSComponent />} />
-              {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+              <Route path="/basicTable" element={<BasicTableComponent />} />
+              <Route path="/sortingTable" element={<SortingTableComponent />} />
+              <Route path="/filteringTable" element={<FilteringTableComponent />} />
               <Route path="/Hydrostatic" element={<Hydrostatic />} />
               {/* <Route path="/faq" element={<Faq />} /> */}
 
