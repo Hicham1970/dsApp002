@@ -17,6 +17,7 @@ import Modal from "@mui/material/Modal";
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
+
 import SearchIcon from "@mui/icons-material/Search";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -29,19 +30,12 @@ import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
 import DS, { Ds } from "../../components/DS"
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DeblurIcon from "@mui/icons-material/Deblur";
-import InputBase from "@mui/material/InputBase";
 import { Link } from "react-router-dom";
 import { signup, login } from "../../authentification.js"; // Import the functions
-import { authentification } from "../../authentification.js";
 import { auth, db } from '../../firebase';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 import AddCardIcon from '@mui/icons-material/AddCard';
-
-
 
 const NavBar = () => {
   const theme = useTheme();
@@ -62,6 +56,8 @@ const NavBar = () => {
   const [openFaqModal, setOpenFaqModal] = useState(false);
   const [faqTitle, setFaqTitle] = useState("");
   const [faqContent, setFaqContent] = useState("");
+  const [faqs, setFaqs] = useState([]); // État pour stocker les FAQs
+
 
 
   const stylePaper = {
@@ -87,7 +83,27 @@ const NavBar = () => {
 
   const handleAccountSubmit = () => {
     console.log('Infos User ')
-  }
+  };
+  // Écouteur en temps réel pour la collection 'faq'
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'faq'), (querySnapshot) => {
+      const faqList = [];
+      querySnapshot.forEach((doc) => {
+        faqList.push({ id: doc.id, ...doc.data() }); // Ajoutez chaque FAQ à la liste
+      });
+      setFaqs(faqList); // Mettez à jour l'état avec la liste des FAQs
+      console.log("Données mises à jour :", faqList);
+    }, (error) => {
+      console.error("Erreur lors de la récupération des données : Vérifiez les permissions de Firebase.", error);
+    });
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, []);
+
+
+
+
   const handleFaqSubmit = async (e) => {
     e.preventDefault();
 
@@ -237,23 +253,7 @@ const NavBar = () => {
 
   // Get Data from the Firebase:
   // db.collection('faq').get().then((querySnapshot) => { })
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Attempt to fetch data from the 'faq' collection
-        const querySnapshot = await getDocs(collection(db, 'faq'));
-        console.log(querySnapshot);
-        querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data());
-        });
-      } catch (error) {
-        // Log a more descriptive error message
-        console.error("Erreur lors de la récupération des données : Vérifiez les permissions de Firebase.", error);
-      }
-    };
 
-    fetchData();
-  }, []);
 
 
   return (
@@ -262,13 +262,14 @@ const NavBar = () => {
       <Box
         display="flex"
 
-        backgroundColor={colors.primary[400]}
+
         borderRadius="3px"
       >
-        <InputBase sx={{ ml: 2, flex: 1 }} placeholder="Search..." />
-        <IconButton type="button" sx={{ p: 1 }}>
-          <SearchIcon />
-        </IconButton>
+
+        {/* Ajout du logo ici */}
+        <img src="/icon.png" alt="Logo" style={{ height: '40px', marginRight: '16px' }} />
+
+
       </Box>
       {/**Icons Right */}
       <Box display="flex" gap={2} sx={{ marginLeft: 'auto' }}>
@@ -321,6 +322,11 @@ const NavBar = () => {
             <Link to="/filteringTable">
               <IconButton>
                 <TableRestaurantIcon />
+              </IconButton>
+            </Link>
+            <Link to="/contactMe">
+              <IconButton>
+                <ConnectWithoutContactIcon />
               </IconButton>
             </Link>
           </>

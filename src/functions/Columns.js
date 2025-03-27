@@ -227,3 +227,61 @@ export const HYDROSTATIC_TABLE = [
     Footer: "MTC",
     accessor: "MTC",
   }]
+
+
+export const HYDRO_ARKLOW_TABLE = [{
+  Header: "Draft Extreme",
+  Footer: "Draft Extreme",
+  accessor: "Draft Extreme",
+},
+{
+  Header: "Draft Moulded",
+  Footer: "Draft Mol",
+  accessor: "Draft Mol",
+}, {
+  Header: "DISP.FW",
+  Footer: "DISP.FW",
+  accessor: "DISPL FW",
+
+}, {
+  Header: "DISP.SW",
+  Footer: "DISPL SW",
+  accessor: "DISPL SW",
+
+}, {
+  Header: "TPC",
+  Footer: "TPC",
+  accessor: "TPC",
+
+}, {
+  Header: "MTC",
+  Footer: "MTC",
+  accessor: "MTC",
+
+}, {
+  Header: "LCB/Mid",
+  Footer: "LCB/Mid",
+  accessor: "LCB/Mid",
+
+}, {
+  Header: "LCB/Aft pp",
+  Footer: "LCB/Aft pp",
+  accessor: "LCB/Aft pp",
+
+}, {
+  Header: "LCF/Mid",
+  Footer: "LCF/Mid",
+  accessor: "LCF/Mid",
+
+}, {
+  Header: "LCF/Aft pp",
+  Footer: "LCF/Aft pp",
+  accessor: "LCF/Aft pp",
+
+}, {
+  Header: "KM",
+  Footer: "KM",
+  accessor: "KM",
+}
+
+]

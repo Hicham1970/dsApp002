@@ -9,13 +9,14 @@ import Grid from '@mui/material/Grid';
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import BackupOutlinedIcon from '@mui/icons-material/BackupOutlined';
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "./Header";
 import { tokens } from "./../theme";
-import PrintToPdf from "./../functions/PrintToPdf";
+
 import {
   calculateMeanFore,
   calculateMeanAft,
@@ -64,6 +65,10 @@ import {
 } from "../functions/calculationUtils";
 import Footer from "./Footer";
 import VesselInfos from './Infos';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { auth } from '../firebase';
+
 
 export default function DS() {
   const theme = useTheme();
@@ -73,8 +78,10 @@ export default function DS() {
   const [isLoader, setIsLoader] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDischarging, setIsDischarging] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [lbp, setLbp] = useState();
+  const [lbp, setLbp] = useState(84.99);
   // Section Initial
   const [keelCorrection, setKeelCorrection] = useState();
   const [foreDistance, setForeDistance] = useState();
@@ -605,6 +612,50 @@ export default function DS() {
     ]
   );
 
+
+  const draftSupCalculated = useMemo(
+    () => (Number(quarterMean) - Number(keelCorrection) + 0.1).toFixed(2),
+    [quarterMean, keelCorrection]
+  );
+
+  const draftInfCalculated = useMemo(
+    () => (Number(quarterMean) - Number(keelCorrection) - 0.1).toFixed(2),
+    [quarterMean, keelCorrection]
+  );
+
+  const quarterPlus50Calculated = useMemo(
+    () => (Number(quarterMean) - Number(keelCorrection) + 0.5).toFixed(2),
+    [quarterMean, keelCorrection]
+  );
+
+  const quarterMinus50Calculated = useMemo(
+    () => (Number(quarterMean) - Number(keelCorrection) - 0.5).toFixed(2),
+    [quarterMean, keelCorrection]
+  );
+
+  // Pour la partie final 
+  const draftSupFinalCalculated = useMemo(
+    () => (Number(quarterMeanFinal) - Number(keelCorrectionFinal) + 0.1).toFixed(2),
+    [quarterMeanFinal, keelCorrectionFinal]
+  );
+
+  const draftInfFinalCalculated = useMemo(
+    () => (Number(quarterMeanFinal) - Number(keelCorrectionFinal) - 0.1).toFixed(2),
+    [quarterMeanFinal, keelCorrectionFinal]
+  );
+
+  const quarterPlus50FinalCalculated = useMemo(
+    () => (Number(quarterMeanFinal) - Number(keelCorrectionFinal) + 0.5).toFixed(2),
+    [quarterMeanFinal, keelCorrectionFinal]
+  );
+
+  const quarterMinus50FinalCalculated = useMemo(
+    () => (Number(quarterMeanFinal) - Number(keelCorrectionFinal) - 0.5).toFixed(2),
+    [quarterMeanFinal, keelCorrectionFinal]
+  );
+
+
+
   const displacementDstyCorrectedFinalCalculated = useMemo(
     () =>
       calculateDisplacementDstyCorrectedFinal(
@@ -644,6 +695,112 @@ export default function DS() {
     () => calculateCargo(netLoadCalculated, netLightCalculated),
     [netLoadCalculated, netLightCalculated]
   );
+
+
+  const handleDraftSurvey = (e) => {
+    e.preventDefault();
+    
+    // Vérifier si l'utilisateur est authentifié
+    if (!auth.currentUser) {
+      alert('Veuillez vous connecter avant de soumettre le rapport.');
+      return;
+    }
+  
+    // Vérifier si tous les champs sont remplis
+    if (!lbp || !keelCorrection || !foreDistance || !aftDistance ||
+      !midDistance || !forePort || !foreStbd || !meanFore || !aftPort ||
+      !aftStbd || !meanAft || !midPort || !midStbd || !meanMid || !trim ||
+      !lbm || !foreCorrected || !aftCorrected || !midCorrected || !trimCorrected ||
+      !meanOfMean || !quarterMean || !meanForeAft || !density || !ballast || !freshWater ||
+      !fuel || !diesel || !lubOil || !others || !lightship || !constant || !netLight ||
+      !netLoad || !cargo || !total || !displacement || !displacementFinal || !keelCorrectionFinal ||
+      !densityFinal || !forePortFinal || !foreStbdFinal || !foreDistanceFinal ||
+      !aftPortFinal || !aftStbdFinal || !aftDistanceFinal || !midPortFinal ||
+      !midStbdFinal || !midDistanceFinal || !trimFinal || !lbmFinal || !draftSupFinal || !draftInfFinal) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+  
+
+    // creation d'un objet draftSurveyReport
+    const draftSurveyReport = {
+      lbp,
+      keelCorrection,
+      keelCorrectionFinal,
+      forePort,
+      forePortFinal,
+      foreStbd,
+      foreStbdFinal,
+      foreDistance,
+      foreDistanceFinal,
+      aftPort,
+      aftPortFinal,
+      aftStbd,
+      aftStbdFinal,
+      aftDistance,
+      aftDistanceFinal,
+      midPort,
+      midPortFinal,
+      midStbd,
+      midStbdFinal,
+      midDistance,
+      midDistanceFinal,
+      displacementSup,
+      displacementSupFinal,
+      tpcSup,
+      tpcSupFinal,
+      lcfSup,
+      lcfSupFinal,
+      draftSup,
+      draftSupFinal,
+      draftInf,
+      draftInfFinal,
+      mtcMinus50,
+      mtcMinus50Final,
+      mtcPlus50,
+      mtcPlus50Final,
+      ballast,
+      ballastFinal,
+      freshWater,
+      freshWaterFinal,
+      fuel,
+      fuelFinal,
+      diesel,
+      dieselFinal,
+      lubOil,
+      lubOilFinal,
+      others,
+      othersFinal,
+      lightship,
+      constant,
+      netLight,
+      netLoad,
+      cargo,
+      total,
+      displacement,
+      density,
+      densityFinal,
+      createdBy: auth.currentUser.uid,
+      createdAt: new Date(),
+    };
+
+    // Enregistrement dans Firestore
+    try {
+      const docRef =  addDoc(collection(db, 'draftSurveyReports'), draftSurveyReport);
+      console.log('Draft survey report saved successfully!');
+      alert('Draft survey report saved successfully!');
+      // clearValues();
+    } catch (error) {
+      console.error('Error saving draft survey report:', error);
+      alert('Failed to save draft survey report');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
 
   //  fonction to Clear the fields:
   const clearValues = () => {
@@ -805,6 +962,16 @@ export default function DS() {
     setDisplacementDstyCorrectedFinal(displacementDstyCorrectedFinalCalculated);
     setTotalFinal(totalFinalCalculated);
     setNetLoad(netLoadCalculated);
+    setDraftSup(draftSupCalculated);
+    setDraftInf(draftInfCalculated);
+    setQuarterPlus50(quarterPlus50Calculated);
+    setQuarterMinus50(quarterMinus50Calculated);
+    setKeelCorrectionFinal(keelCorrectionFinal);
+    setDraftSupFinal(draftSupFinalCalculated);
+    setDraftInfFinal(draftInfFinalCalculated);
+    setQuarterPlus50Final(quarterPlus50FinalCalculated);
+    setQuarterMinus50Final(quarterMinus50FinalCalculated);
+    setQuarterMeanFinal(quarterMeanFinalCalculated);
   }, [
     meanForeCalculated,
     meanAftCalculated,
@@ -843,18 +1010,13 @@ export default function DS() {
     trimCorrectedFinalCalculated,
     meanForeAftFinalCalculated,
     meanOfMeanFinalCalculated,
-    quarterMeanFinalCalculated,
-    trimCorrectedFinal,
-    meanForeAftFinal,
-    meanOfMeanFinal,
     quarterMeanFinal,
-    keelCorrectionFinal,
+
     keelCorrection,
     displacementFinalCalculated,
     tpcFinalCalculated,
     lcfFinalCalculated,
-    draftSupFinal,
-    draftInfFinal,
+
     lcfSupFinal,
     lcfInfFinal,
     firstTrimCorrectionFinalCalculated,
@@ -867,67 +1029,65 @@ export default function DS() {
     ballastFinal,
     totalFinalCalculated,
     displacementDstyCorrectedFinalCalculated,
+    draftSup,
+    draftInf,
+    draftSupCalculated,
+    draftInfCalculated,
+    quarterPlus50Calculated,
+    quarterMinus50Calculated,
+    quarterMinus50,
+    quarterPlus50,
+    quarterMeanFinal,
+    quarterMeanFinalCalculated,
+    keelCorrection,
+    keelCorrectionFinal,
+    draftSupFinalCalculated,
+    draftInfFinalCalculated,
+    quarterPlus50FinalCalculated,
+    quarterMinus50FinalCalculated,
   ]);
 
-  useEffect(() => {
-    if (quarterMean) {
-      const calculatedDraftSup = (
-        Number(Math.round(quarterMean * 10) / 10) + 0.1
-      ).toFixed(2);
-      const calculatedDraftInf = (
-        Number(Math.round(quarterMean * 10) / 10) - 0.1
-      ).toFixed(2);
+  // useEffect(() => {
+  //   if (quarterMean) {
+  //     const calculatedDraftSup =Math.round((Number(quarterMean) - Number(keelCorrection)) + 0.1).toFixed(2);
+  //     const calculatedDraftInf = Math.round((Number(quarterMean) - Number(keelCorrection)) - 0.1).toFixed(2);
 
-      const calculatedQuarterPlus50 = (
-        Number(Math.round(quarterMean * 10) / 10) + 0.5
-      ).toFixed(2);
-      const calculatedQuarterMinus50 = (
-        Number(Math.round(quarterMean * 10) / 10) - 0.5
-      ).toFixed(2);
+  //     const calculatedQuarterPlus50 = Math.round(((Number(quarterMean) - Number(keelCorrection)) + 0.5).toFixed(2));
+  //     const calculatedQuarterMinus50 = Math.round(((Number(quarterMean) - Number(keelCorrection)) - 0.5).toFixed(2));
 
-      setDraftSup(calculatedDraftSup);
-      setDraftInf(calculatedDraftInf);
-      setQuarterPlus50(calculatedQuarterPlus50);
-      setQuarterMinus50(calculatedQuarterMinus50);
-    }
-  }, [quarterMean]); // Dépendance sur quarterMean
+
+  //     setDraftSup(calculatedDraftSup);
+  //     setDraftInf(calculatedDraftInf);
+  //     setQuarterPlus50(calculatedQuarterPlus50);
+  //     setQuarterMinus50(calculatedQuarterMinus50);
+  //   }
+  // }, [quarterMean, keelCorrection]); // Dépendance sur quarterMean
   // Ajoutez draftInf ici
 
   // Pour le calcul automatic Final
 
-  useEffect(() => {
-    if (quarterMeanFinal) {
-      const calculatedDraftSupFinal = (
-        Number(Math.round(quarterMeanFinal * 10) / 10) + 0.1
-      ).toFixed(2);
-      const calculatedDraftInfFinal = (
-        Number(Math.round(quarterMeanFinal * 10) / 10) - 0.1
-      ).toFixed(2);
-      const calculatedQuarterPlus50Final = (
-        Number(Math.round(quarterMeanFinal * 10) / 10) + 0.5
-      ).toFixed(2);
-      const calculatedQuarterMinus50Final = (
-        Number(Math.round(quarterMeanFinal * 10) / 10) - 0.5
-      ).toFixed(2);
+  // useEffect(() => {
+  //   if (quarterMeanFinal) {
+  //     const calculatedDraftSupFinal = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) + 0.1).toFixed(2);
+  //     const calculatedDraftInfFinal = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) - 0.1).toFixed(2);
 
-      setQuarterPlus50Final(calculatedQuarterPlus50Final);
-      setQuarterMinus50Final(calculatedQuarterMinus50Final);
-      setDraftSupFinal(calculatedDraftSupFinal);
-      setDraftInfFinal(calculatedDraftInfFinal);
-    }
-  }, [quarterMeanFinal]);
+  //     const calculatedQuarterPlus50Final = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) + 0.5).toFixed(2);
+  //     const calculatedQuarterMinus50Final = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) - 0.5).toFixed(2);
+
+
+  //     setDraftSupFinal(calculatedDraftSupFinal);
+  //     setDraftInfFinal(calculatedDraftInfFinal);
+  //     setQuarterPlus50Final(calculatedQuarterPlus50Final);
+  //     setQuarterMinus50Final(calculatedQuarterMinus50Final);
+  //   }
+  // }, [quarterMeanFinal, keelCorrectionFinal]);
 
 
 
   return (
     <>
       <Box m="20px" id="printMe">
-        <Header title="Mv Arc Rainbow" subtitle="Draft Survey Calculation" />
-        <img
-          src={`${process.env.PUBLIC_URL}/icon.png`}
-          alt="Mariner Logo"
-          style={{ width: "80px", height: "70px", marginRight: "5px" }}
-        />
+        <Header title="Mv Arklow Rainbow" subtitle="Draft Survey Calculation" />
         < VesselInfos />
         <Grid container spacing={3}>
           {/**INITIAL */}
@@ -1027,6 +1187,38 @@ export default function DS() {
                   },
                 }}
               />
+            </Grid>
+            {/* grid pour le bouton Submit the draft survey */}
+            <Grid item xs={12} sm={3}>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={handleDraftSurvey}
+                startIcon={<BackupOutlinedIcon />}
+                sx={{
+                  backgroundColor: colors.redAccent[200],
+                  color: colors.grey[700],
+                  '&:hover': {
+                    backgroundColor: colors.redAccent[600],
+                  },
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontSize: "16px",
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:disabled': {
+                    backgroundColor: colors.grey[500],
+                    opacity: 0.7,
+                  }
+                }}
+              >
+                Submit
+              </Button>
             </Grid>
 
           </Grid>
@@ -1458,7 +1650,7 @@ export default function DS() {
                     disabled
                     variant="standard"
                     label="Quarter Mean"
-                    value={quarterMean}
+                    value={(Number(quarterMean) - Number(keelCorrection)).toFixed(2)}
                     onChange={(e) => setQuarterMean(e.target.value)}
                     sx={{
                       '& .MuiInputLabel-root': {
@@ -1592,7 +1784,7 @@ export default function DS() {
                     variant="standard"
                     type="number"
                     label="Quarter"
-                    value={quarterMean}
+                    value={(Number(quarterMean) - Number(keelCorrection)).toFixed(2)}
                     onChange={(e) => setQuarterMean(e.target.value)}
                     sx={{
                       width: "100px",
@@ -2584,7 +2776,7 @@ export default function DS() {
                     disabled
                     variant="standard"
                     label="Quarter Mean"
-                    value={quarterMeanFinal}
+                    value={(Number(quarterMeanFinal) - Number(keelCorrectionFinal)).toFixed(2)}
                     onChange={(e) => setQuarterMeanFinal(e.target.value)}
                     sx={{
                       width: "100px",

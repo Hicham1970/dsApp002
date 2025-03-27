@@ -13,6 +13,7 @@ import LoadingPage from "./scenes/loadingPage";
 import BasicTableComponent from "./scenes/basicTable";
 import SortingTableComponent from "./scenes/sortingTable";
 import FilteringTableComponent from "./scenes/filteringTable";
+import ContactMeComponent from "./scenes/contactMe";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -34,6 +35,7 @@ function App() {
               <Route path="/filteringTable" element={<FilteringTableComponent />} />
               <Route path="/Hydrostatic" element={<Hydrostatic />} />
               {/* <Route path="/faq" element={<Faq />} /> */}
+              <Route path="/contactMe" element={<ContactMeComponent />} />
 
             </Routes>
           </main>

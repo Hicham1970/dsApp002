@@ -3,8 +3,9 @@ import React, { useMemo } from 'react';
 import { useTable, useGlobalFilter, useFilters } from 'react-table';
 import { Contacts } from '../data/contacts_table';
 import { hydrostatic_table } from '../data/hydrostatic_table';
+import { hydro_Arklow, hydro_Arklow_table } from '../data/hydro_Arklow';
 import { operations_data } from '../data/operation_data';
-import { COLUMNS, OPERATIONS_DATA, GROUPED_COLUMNS, HYDROSTATIC_TABLE } from '../functions/Columns';
+import { COLUMNS, OPERATIONS_DATA, GROUPED_COLUMNS, HYDROSTATIC_TABLE, HYDRO_ARKLOW_TABLE } from '../functions/Columns';
 import '../BasicTable.css'; // Importez le CSS
 import GlobalFilter from '../functions/GlobalFilter';
 // import ColumnFilter from '../functions/ColumnFilter';
@@ -38,8 +39,11 @@ function FilteringTable() {
   // const columns = useMemo(() => OPERATIONS_DATA, []);
   // const data = useMemo(() => operations_data, []);
   // hydrostatic table
-  const columns = useMemo(() => HYDROSTATIC_TABLE, []);
-  const data = useMemo(() => hydrostatic_table, []);
+  // const columns = useMemo(() => HYDROSTATIC_TABLE, []);
+  // const data = useMemo(() => hydrostatic_table, []);
+  // hydro_Arklow table
+  const columns = useMemo(() => HYDRO_ARKLOW_TABLE, []);
+  const data = useMemo(() => hydro_Arklow_table, []);
 
 
   const tableInstance = useTable({
