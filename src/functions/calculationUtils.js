@@ -94,7 +94,7 @@ export const calculateForeCorrected = (trim, foreDistance, lbm, meanFore) => {
   } else {
     foreCorrected = meanForeValue;
   }
-
+  console.log('foreCorrected :', foreCorrected);
   return foreCorrected.toFixed(2);
 };
 
@@ -173,31 +173,35 @@ export const calculateTrimCorrected = (meanAftCorrected, meanForeCorrected) => {
 };
 
 
-export const calculateMeanForeAft = (foreCorrected, aftCorrected) => {
+export const calculateMeanForeAft = (calculatedForeCorrected, calculatedAftCorrected) => {
   let meanForeAft = 0;
-  const foreCorrectedValue = foreCorrected;
-  const aftCorrectedValue = aftCorrected;
+  const foreCorrectedValue = Number(calculatedForeCorrected);
+  const aftCorrectedValue = Number(calculatedAftCorrected);
 
-  meanForeAft = (Number(foreCorrectedValue) + Number(aftCorrectedValue)) / 2;
-  return meanForeAft.toFixed(2);
+  console.log('the foreCorrected :',foreCorrectedValue);
+  console.log('the Aft Corrected :', aftCorrectedValue); 
+
+  meanForeAft = (foreCorrectedValue + aftCorrectedValue) / 2;
+  console.log('the meanForeAft :', meanForeAft);
+  return meanForeAft.toFixed(3);
 };
 
 export const calculateMeanOfMean = (midCorrected, meanForeAft) => {
   let meanOfMean = 0;
-  const midCorrectedValue = midCorrected;
-  const meanForeAftValue = meanForeAft;
+  const midCorrectedValue = Number(midCorrected);
+  const meanForeAftValue = Number(meanForeAft);
 
-  meanOfMean = (Number(midCorrectedValue) + Number(meanForeAftValue)) / 2;
-  return meanOfMean.toFixed(2);
+  meanOfMean = (midCorrectedValue + meanForeAftValue) / 2;
+  return meanOfMean.toFixed(3);
 };
 
 export const calculateQuarterMean = (midCorrected, meanOfMean) => {
   let quarterMean = 0;
-  const midCorrectedValue = midCorrected;
-  const meanOfMeanValue = meanOfMean;
+  const midCorrectedValue = Number(midCorrected);
+  const meanOfMeanValue = Number(meanOfMean);
 
-  quarterMean = (Number(midCorrectedValue) + Number(meanOfMeanValue)) / 2;
-  return quarterMean.toFixed(2);
+  quarterMean = (midCorrectedValue + meanOfMeanValue) / 2;
+  return quarterMean.toFixed(3);
 };
 
 
@@ -490,6 +494,16 @@ export const calculateConstant = (netLight, lightship) => {
 
   return constant.toFixed(2);
 };
+
+
+export const calculateCargoAndConstant = (netLoad, lightship)=>{
+  let cargoAndConstant; 
+  const netLoadValue= Number(netLoad); 
+  const lightshipValue= Number(lightship) ; 
+
+  cargoAndConstant = netLoadValue - lightshipValue; 
+  return cargoAndConstant.toFixed(2); 
+}
 
 
 //  Fonctions de la logique section final
@@ -964,15 +978,15 @@ export const calculateTotalFinal = (
   return totalFinal.toFixed(2);
 };
 
-
-export const calculateNetLoad = (totalFinal, displacementDstyCorrectedFinal) => {
+// Si on est en Loading Phase  
+export const calculateNetLoad = (total, displacementDstyCorrected) => {
   let netLoad = 0;
-  const totalFinalValue = Number(totalFinal);
-  const displacementDstyCorrectedFinalValue = Number(displacementDstyCorrectedFinal);
-  console.log("displacementDstyCorrectedFinalValue :", displacementDstyCorrectedFinalValue);
-  console.log('totalFinalValue :', totalFinalValue);
+  const totalValue = Number(total);
+  const displacementDstyCorrectedValue = Number(displacementDstyCorrected);
+  console.log("displacementDstyCorrectedValue :", displacementDstyCorrectedValue);
+  console.log('totalValue :', totalValue);
 
-  netLoad = Number(displacementDstyCorrectedFinalValue) - Number(totalFinalValue);
+  netLoad = Number(displacementDstyCorrectedValue) - Number(totalValue);
   console.log('Net Load:', netLoad);
   return netLoad.toFixed(2);
 };

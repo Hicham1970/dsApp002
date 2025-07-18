@@ -62,6 +62,7 @@ import {
   calculateSecondTrimCorrectionFinal,
   calculateDisplacementDstyCorrectedFinal,
   calculateTotalFinal,
+  calculateCargoAndConstant,
 } from "../functions/calculationUtils";
 import Footer from "./Footer";
 import VesselInfos from './Infos';
@@ -80,6 +81,8 @@ export default function DS() {
   const [isDischarging, setIsDischarging] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
 
   const [lbp, setLbp] = useState(84.99);
   // Section Initial
@@ -138,6 +141,7 @@ export default function DS() {
   const [constant, setConstant] = useState();
   const [netLight, setNetLight] = useState();
   const [cargo, setCargo] = useState();
+  const [cargoAndConstant, setCargoAndConstant] = useState();
   const [netLoad, setNetLoad] = useState();
   const [constantDéclarée, setConstantDéclarée] = useState();
   const [signature, setSignature] = useState();
@@ -396,10 +400,45 @@ export default function DS() {
     [ballast, freshWater, fuel, diesel, lubOil, others]
   );
 
+  const totalFinalCalculated = useMemo(
+    () => calculateTotalFinal(
+      ballastFinal,
+      freshWaterFinal,
+      fuelFinal,
+      dieselFinal,
+      lubOilFinal,
+      othersFinal
+    ),
+    [
+      ballastFinal,
+      freshWaterFinal,
+      fuelFinal,
+      dieselFinal,
+      lubOilFinal,
+      othersFinal,
+    ]
+  );
+
   const netLightCalculated = useMemo(
-    () =>
-      calculateNetLight(totalCalculated, displacementDstyCorrectionCalculated),
-    [totalCalculated, displacementDstyCorrectionCalculated]
+    () => {
+      if (isLoading) {
+        return calculateNetLight(totalCalculated, displacementDstyCorrected);
+      } else {
+        return calculateNetLight(totalFinalCalculated, displacementDstyCorrectedFinal);
+      }
+    },
+    [isLoading, totalCalculated, displacementDstyCorrected, totalFinalCalculated, displacementDstyCorrectedFinal]
+  );
+
+  const netLoadCalculated = useMemo(
+    () => {
+      if (isLoading) {
+        return calculateNetLoad(totalFinalCalculated, displacementDstyCorrectedFinal);
+      } else {
+        return calculateNetLoad(totalCalculated, displacementDstyCorrected);
+      }
+    },
+    [isLoading, totalCalculated, displacementDstyCorrected, totalFinalCalculated, displacementDstyCorrectedFinal]
   );
 
   const constantCalculated = useMemo(
@@ -665,47 +704,59 @@ export default function DS() {
     [displacementTrimCorrectedFinalCalculated, densityFinal]
   );
 
-  const totalFinalCalculated = useMemo(
-    () =>
-      calculateTotalFinal(
-        ballastFinal,
-        freshWaterFinal,
-        fuelFinal,
-        dieselFinal,
-        lubOilFinal,
-        othersFinal
-      ),
-    [
-      ballastFinal,
-      freshWaterFinal,
-      fuelFinal,
-      dieselFinal,
-      lubOilFinal,
-      othersFinal,
-    ]
-  );
-
-  const netLoadCalculated = useMemo(
-    () =>
-      calculateNetLoad(totalFinalCalculated, displacementDstyCorrectedFinal),
-    [totalFinalCalculated, displacementDstyCorrectedFinal]
-  );
-
   const cargoCalculated = useMemo(
     () => calculateCargo(netLoadCalculated, netLightCalculated),
     [netLoadCalculated, netLightCalculated]
   );
 
+  // ? TODO il faut corriger cette fonction 
+  // Il faut savoir que si je suis en phase isLoading ; le netlight = displ - total 
+  // et netload = dispFinal - totalFilal
+  // Et si on est en phase de isDischarging netload = displ - total et netlight = displFinal - totalFinal
+  // A verifié en urgence   
+  const cargoAndConstantCalculated = useMemo(
+    () => calculateCargoAndConstant(netLoadCalculated, lightship), [netLoadCalculated, lightship]
+  );
 
+
+  const handleInputChange = (e, setState) => {
+    const value = e.target.value;
+    if (value === '') {
+      setState('');
+      return;
+    }
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+      console.error('Invalid number:', value);
+      return;
+    }
+    setState(numValue);
+  };
+
+  const handleInputChangeFinal = (e, setState) => {
+    const value = e.target.value;
+    if (value === '') {
+      setState('');
+      return;
+    }
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+      console.error('Invalid number:', value);
+      return;
+    }
+    setState(numValue);
+  };
+
+  // envoi du draft survey report a la base de données firebase:
   const handleDraftSurvey = (e) => {
     e.preventDefault();
-    
+
     // Vérifier si l'utilisateur est authentifié
     if (!auth.currentUser) {
       alert('Veuillez vous connecter avant de soumettre le rapport.');
       return;
     }
-  
+
     // Vérifier si tous les champs sont remplis
     if (!lbp || !keelCorrection || !foreDistance || !aftDistance ||
       !midDistance || !forePort || !foreStbd || !meanFore || !aftPort ||
@@ -720,7 +771,7 @@ export default function DS() {
       alert("Veuillez remplir tous les champs.");
       return;
     }
-  
+
 
     // creation d'un objet draftSurveyReport
     const draftSurveyReport = {
@@ -786,7 +837,7 @@ export default function DS() {
 
     // Enregistrement dans Firestore
     try {
-      const docRef =  addDoc(collection(db, 'draftSurveyReports'), draftSurveyReport);
+      const docRef = addDoc(collection(db, 'draftSurveyReports'), draftSurveyReport);
       console.log('Draft survey report saved successfully!');
       alert('Draft survey report saved successfully!');
       // clearValues();
@@ -840,6 +891,7 @@ export default function DS() {
     setLcfInf("");
     setLcf("");
     setQuarter("");
+    setMtc("");
     setMtcPlus50("");
     setQuarterPlus50("");
     setQuarterMinus50("");
@@ -938,6 +990,7 @@ export default function DS() {
     setConstant(constantCalculated);
     setNetLoad(netLoadCalculated);
     setCargo(cargoCalculated);
+    setCargoAndConstant(cargoAndConstantCalculated)
 
     setMeanForeFinal(meanForeFinalCalculated);
     setMeanAftFinal(meanAftFinalCalculated);
@@ -998,6 +1051,7 @@ export default function DS() {
     netLoadCalculated,
     netLoad,
     cargoCalculated,
+    constant,
     cargo,
     meanForeFinalCalculated,
     meanAftFinalCalculated,
@@ -1045,44 +1099,55 @@ export default function DS() {
     draftInfFinalCalculated,
     quarterPlus50FinalCalculated,
     quarterMinus50FinalCalculated,
+    cargoAndConstantCalculated,
   ]);
 
-  // useEffect(() => {
-  //   if (quarterMean) {
-  //     const calculatedDraftSup =Math.round((Number(quarterMean) - Number(keelCorrection)) + 0.1).toFixed(2);
-  //     const calculatedDraftInf = Math.round((Number(quarterMean) - Number(keelCorrection)) - 0.1).toFixed(2);
+  // Styles communs pour les TextField et les Checkboxes
+  const textFieldStyle = {
+    width: "100px",
+    '& .MuiInputLabel-root': {
+      transform: 'translate(0, -1.5px) scale(0.75)',
+      transformOrigin: 'top left',
+      '&.Mui-disabled': {
+        color: colors.greenAccent[500],
+      },
+    },
+    '& .MuiInput-root': {
+      marginTop: '16px',
+    },
+  };
 
-  //     const calculatedQuarterPlus50 = Math.round(((Number(quarterMean) - Number(keelCorrection)) + 0.5).toFixed(2));
-  //     const calculatedQuarterMinus50 = Math.round(((Number(quarterMean) - Number(keelCorrection)) - 0.5).toFixed(2));
+  const checkboxStyle = {
+    color: colors.greenAccent[500],
+    '&.Mui-checked': {
+      color: colors.greenAccent[800],
+    },
+    '& .MuiSvgIcon-root': {
+      fontSize: 34,
+    },
+    '&:hover': {
+      backgroundColor: colors.greenAccent[200],
+    },
+  };
 
+  const checkboxLabelStyle = {
+    '& .MuiFormControlLabel-label': {
+      fontSize: '1rem',
+      fontWeight: isLoading ? 600 : 400,
+      color: isLoading ? colors.greenAccent[700] : 'text.primary',
+      transition: 'all 0.2s ease-in-out',
+    },
+  };
 
-  //     setDraftSup(calculatedDraftSup);
-  //     setDraftInf(calculatedDraftInf);
-  //     setQuarterPlus50(calculatedQuarterPlus50);
-  //     setQuarterMinus50(calculatedQuarterMinus50);
-  //   }
-  // }, [quarterMean, keelCorrection]); // Dépendance sur quarterMean
-  // Ajoutez draftInf ici
-
-  // Pour le calcul automatic Final
-
-  // useEffect(() => {
-  //   if (quarterMeanFinal) {
-  //     const calculatedDraftSupFinal = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) + 0.1).toFixed(2);
-  //     const calculatedDraftInfFinal = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) - 0.1).toFixed(2);
-
-  //     const calculatedQuarterPlus50Final = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) + 0.5).toFixed(2);
-  //     const calculatedQuarterMinus50Final = Math.round((Number(quarterMeanFinal) - Number(keelCorrectionFinal)) - 0.5).toFixed(2);
-
-
-  //     setDraftSupFinal(calculatedDraftSupFinal);
-  //     setDraftInfFinal(calculatedDraftInfFinal);
-  //     setQuarterPlus50Final(calculatedQuarterPlus50Final);
-  //     setQuarterMinus50Final(calculatedQuarterMinus50Final);
-  //   }
-  // }, [quarterMeanFinal, keelCorrectionFinal]);
-
-
+  // gestionnaires d'erreurs globaux
+  useEffect(() => {
+    const handleError = (e) => {
+      setError(e.message);
+      console.error('Application error:', e);
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   return (
     <>
@@ -1111,7 +1176,7 @@ export default function DS() {
                 type="number"
                 label="Lbp"
                 value={lbp}
-                onChange={(e) => setLbp(e.target.value)}
+                onChange={(e) => handleInputChange(e, setLbp)}
               />
             </Grid>
             {/**CheckBox pour choisir le type de draft: Loading or Discharging */}
@@ -1126,29 +1191,11 @@ export default function DS() {
                         setIsDischarging(false);
                       }
                     }}
-                    sx={{
-                      color: colors.greenAccent[500], // Couleur par défaut
-                      '&.Mui-checked': {
-                        color: colors.greenAccent[800], // Couleur quand coché
-                      },
-                      '& .MuiSvgIcon-root': {
-                        fontSize: 34, // Taille de l'icône
-                      },
-                      '&:hover': {
-                        backgroundColor: colors.greenAccent[200], // Effet hover
-                      },
-                    }}
+                    sx={checkboxStyle}
                   />
                 }
                 label="Loading"
-                sx={{
-                  '& .MuiFormControlLabel-label': {
-                    fontSize: '1rem',
-                    fontWeight: isLoading ? 600 : 400,
-                    color: isLoading ? colors.greenAccent[700] : 'text.primary',
-                    transition: 'all 0.2s ease-in-out',
-                  },
-                }}
+                sx={checkboxLabelStyle}
               />
             </Grid>
 
@@ -1163,29 +1210,11 @@ export default function DS() {
                         setIsLoading(false);
                       }
                     }}
-                    sx={{
-                      color: colors.greenAccent[500], // Couleur par défaut
-                      '&.Mui-checked': {
-                        color: colors.greenAccent[700], // Couleur quand coché
-                      },
-                      '& .MuiSvgIcon-root': {
-                        fontSize: 34, // Taille de l'icône
-                      },
-                      '&:hover': {
-                        backgroundColor: colors.greenAccent[200], // Effet hover
-                      },
-                    }}
+                    sx={checkboxStyle}
                   />
                 }
                 label="Discharging"
-                sx={{
-                  '& .MuiFormControlLabel-label': {
-                    fontSize: '1rem',
-                    fontWeight: !isLoading ? 600 : 400,
-                    color: !isLoading ? colors.greenAccent[700] : 'text.primary',
-                    transition: 'all 0.2s ease-in-out',
-                  },
-                }}
+                sx={checkboxLabelStyle}
               />
             </Grid>
             {/* grid pour le bouton Submit the draft survey */}
@@ -1235,7 +1264,7 @@ export default function DS() {
                     variant="filled"
                     label="Keel Correction"
                     value={keelCorrection}
-                    onChange={(e) => setKeelCorrection(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setKeelCorrection)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1244,7 +1273,7 @@ export default function DS() {
                     variant="filled"
                     label="Density"
                     value={density}
-                    onChange={(e) => setDensity(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setDensity)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1255,21 +1284,7 @@ export default function DS() {
                     label="Trim"
                     value={trim}
                     onChange={(e) => setTrim(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1280,21 +1295,7 @@ export default function DS() {
                     label="Lbm"
                     value={lbm}
                     onChange={(e) => setLbm(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1319,7 +1320,7 @@ export default function DS() {
                     type="number"
                     label="Fore Port"
                     value={forePort}
-                    onChange={(e) => setForePort(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForePort)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1328,7 +1329,7 @@ export default function DS() {
                     variant="filled"
                     label="Fore Stbd"
                     value={foreStbd}
-                    onChange={(e) => setForeStbd(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForeStbd)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1337,7 +1338,7 @@ export default function DS() {
                     variant="filled"
                     label="Fore Distance"
                     value={foreDistance}
-                    onChange={(e) => setForeDistance(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForeDistance)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1348,21 +1349,7 @@ export default function DS() {
                     label="Mean Fore"
                     value={meanFore}
                     onChange={(e) => setMeanFore(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1377,7 +1364,7 @@ export default function DS() {
                     type="number"
                     label="Aft Port"
                     value={aftPort}
-                    onChange={(e) => setAftPort(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftPort)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1386,7 +1373,7 @@ export default function DS() {
                     variant="filled"
                     label="Aft Stbd"
                     value={aftStbd}
-                    onChange={(e) => setAftStbd(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftStbd)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1395,7 +1382,7 @@ export default function DS() {
                     variant="filled"
                     label="Aft Distance"
                     value={aftDistance}
-                    onChange={(e) => setAftDistance(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftDistance)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1406,21 +1393,7 @@ export default function DS() {
                     label="Mean Aft"
                     value={meanAft}
                     onChange={(e) => setMeanAft(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1435,7 +1408,7 @@ export default function DS() {
                     type="number"
                     label="Mid Port"
                     value={midPort}
-                    onChange={(e) => setMidPort(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidPort)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1444,7 +1417,7 @@ export default function DS() {
                     variant="filled"
                     label="Mid Stbd"
                     value={midStbd}
-                    onChange={(e) => setMidStbd(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidStbd)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1453,7 +1426,7 @@ export default function DS() {
                     variant="filled"
                     label="Mid Distance"
                     value={midDistance}
-                    onChange={(e) => setMidDistance(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidDistance)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1464,21 +1437,7 @@ export default function DS() {
                     label="Mean Mid"
                     value={meanMid}
                     onChange={(e) => setMeanMid(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1495,21 +1454,7 @@ export default function DS() {
                     label="Fore Corrected"
                     value={foreCorrected}
                     onChange={(e) => setForeCorrected(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1520,21 +1465,7 @@ export default function DS() {
                     label="Aft Corrected"
                     value={aftCorrected}
                     onChange={(e) => setAftCorrected(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
 
@@ -1546,21 +1477,7 @@ export default function DS() {
                     label="Mid Corrected"
                     value={midCorrected}
                     onChange={(e) => setMidCorrected(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1577,21 +1494,7 @@ export default function DS() {
                     label="Trim Corrected"
                     value={trimCorrected}
                     onChange={(e) => setTrimCorrected(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1602,21 +1505,7 @@ export default function DS() {
                     label="Mean Fore Aft"
                     value={meanForeAft}
                     onChange={(e) => setMeanForeAft(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1627,21 +1516,7 @@ export default function DS() {
                     label="Mean Of Mean"
                     value={meanOfMean}
                     onChange={(e) => setMeanOfMean(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1652,21 +1527,7 @@ export default function DS() {
                     label="Quarter Mean"
                     value={(Number(quarterMean) - Number(keelCorrection)).toFixed(2)}
                     onChange={(e) => setQuarterMean(e.target.value)}
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -1692,23 +1553,7 @@ export default function DS() {
                     label="Draft Inf"
                     value={draftInf}
                     onChange={(e) => setDraftInf(e.target.value)}
-
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -1746,22 +1591,7 @@ export default function DS() {
                     label="Quarter +50"
                     value={quarterPlus50}
                     onChange={(e) => setQuarterPlus50(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -1786,22 +1616,7 @@ export default function DS() {
                     label="Quarter"
                     value={(Number(quarterMean) - Number(keelCorrection)).toFixed(2)}
                     onChange={(e) => setQuarterMean(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -1811,22 +1626,7 @@ export default function DS() {
                     label="Displacement"
                     value={displacement}
                     onChange={(e) => setDisplacement(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -1836,22 +1636,7 @@ export default function DS() {
                     label="Tpc"
                     value={tpc}
                     onChange={(e) => setTpc(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -1861,22 +1646,7 @@ export default function DS() {
                     label="Lcf"
                     value={lcf}
                     onChange={(e) => setLcf(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
 
@@ -1884,23 +1654,22 @@ export default function DS() {
                   <TextField
                     disabled
                     variant="standard"
+                    type="number"
                     label="MTC"
                     value={(Number(mtcPlus50) - Number(mtcMinus50)).toFixed(2)}
                     onChange={(e) => setMtc(e.target.value)}
                     sx={{
-                      width: "120px",
+                      width: "100px",
                       marginLeft: "50px",
                       '& .MuiInputLabel-root': {
-                        // Style pour le label
                         transform: 'translate(0, -1.5px) scale(0.75)',
                         transformOrigin: 'top left',
                         '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
+                          color: colors.greenAccent[500],
                         },
                       },
                       '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
+                        marginTop: '16px',
                       },
 
                     }}
@@ -1919,27 +1688,11 @@ export default function DS() {
                     label="Draft Sup"
                     value={draftSup}
                     onChange={(e) => setDraftSup(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
                   <TextField
-
                     variant="filled"
                     label="Displacement Sup"
                     value={displacementSup}
@@ -1949,7 +1702,6 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={4} sm={2}>
                   <TextField
-
                     variant="filled"
                     label="Tpc Sup"
                     value={tpcSup}
@@ -1959,7 +1711,6 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={4} sm={2}>
                   <TextField
-
                     variant="filled"
                     label="Lcf Sup"
                     value={lcfSup}
@@ -1975,22 +1726,7 @@ export default function DS() {
                     label="Quarter -50"
                     value={quarterMinus50}
                     onChange={(e) => setQuarterMinus50(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2009,22 +1745,7 @@ export default function DS() {
               <Grid container spacing={0.5} alignItems="center">
                 <Grid item xs={4} sm={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     type="number"
@@ -2035,22 +1756,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="S T C "
@@ -2060,22 +1766,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="D C T"
@@ -2085,22 +1776,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="D C D "
@@ -2129,7 +1805,7 @@ export default function DS() {
                     type="number"
                     label="Ballast"
                     value={ballast}
-                    onChange={(e) => setBallast(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setBallast)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2138,7 +1814,7 @@ export default function DS() {
                     variant="filled"
                     label="F W"
                     value={freshWater}
-                    onChange={(e) => setFreshWater(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setFreshWater)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2147,7 +1823,7 @@ export default function DS() {
                     variant="filled"
                     label="Fuel"
                     value={fuel}
-                    onChange={(e) => setFuel(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setFuel)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2156,7 +1832,7 @@ export default function DS() {
                     variant="filled"
                     label="Diesel"
                     value={diesel}
-                    onChange={(e) => setDiesel(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setDiesel)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2166,7 +1842,7 @@ export default function DS() {
                     variant="filled"
                     label="Lub"
                     value={lubOil}
-                    onChange={(e) => setLubOil(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setLubOil)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2175,7 +1851,7 @@ export default function DS() {
                     variant="filled"
                     label="Others"
                     value={others}
-                    onChange={(e) => setOthers(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setOthers)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -2187,31 +1863,15 @@ export default function DS() {
                 <Grid item xs={4} sm={2}>
                   <TextField
                     sx={{ width: "100px" }}
-
                     variant="filled"
                     label="Light Ship"
                     value={lightship}
-                    onChange={(e) => setLightship(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setLightship)}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2} >
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     type="number"
@@ -2224,22 +1884,7 @@ export default function DS() {
                   <>
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Net Load"
@@ -2250,27 +1895,12 @@ export default function DS() {
 
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Cargo + Cst"
-                        value={cargo}
-                        onChange={(e) => setCargo(e.target.value)}
+                        value={cargoAndConstant}
+                        onChange={(e) => setCargoAndConstant(e.target.value)}
                       />
                     </Grid>
                   </>
@@ -2278,22 +1908,7 @@ export default function DS() {
                   <>
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Net Light"
@@ -2304,22 +1919,7 @@ export default function DS() {
 
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Constant"
@@ -2350,7 +1950,7 @@ export default function DS() {
                     variant="filled"
                     label="Keel Correction"
                     value={keelCorrectionFinal}
-                    onChange={(e) => setKeelCorrectionFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setKeelCorrectionFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2359,7 +1959,7 @@ export default function DS() {
                     variant="filled"
                     label="Density"
                     value={densityFinal}
-                    onChange={(e) => setDensityFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setDensityFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2370,22 +1970,7 @@ export default function DS() {
                     label="Trim"
                     value={trimFinal}
                     onChange={(e) => setTrimFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2396,22 +1981,7 @@ export default function DS() {
                     label="Lbm"
                     value={lbmFinal}
                     onChange={(e) => setLbmFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2436,7 +2006,7 @@ export default function DS() {
                     type="number"
                     label="Fore Port"
                     value={forePortFinal}
-                    onChange={(e) => setForePortFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForePortFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2445,7 +2015,7 @@ export default function DS() {
                     variant="filled"
                     label="Fore Stbd"
                     value={foreStbdFinal}
-                    onChange={(e) => setForeStbdFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForeStbdFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2454,7 +2024,7 @@ export default function DS() {
                     variant="filled"
                     label="Fore Distance"
                     value={foreDistanceFinal}
-                    onChange={(e) => setForeDistanceFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setForeDistanceFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2465,22 +2035,7 @@ export default function DS() {
                     label="Mean Fore"
                     value={meanForeFinal}
                     onChange={(e) => setMeanForeFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2495,7 +2050,7 @@ export default function DS() {
                     type="number"
                     label="Aft Port"
                     value={aftPortFinal}
-                    onChange={(e) => setAftPortFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftPortFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2504,7 +2059,7 @@ export default function DS() {
                     variant="filled"
                     label="Aft Stbd"
                     value={aftStbdFinal}
-                    onChange={(e) => setAftStbdFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftStbdFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2513,7 +2068,7 @@ export default function DS() {
                     variant="filled"
                     label="Aft Distance"
                     value={aftDistanceFinal}
-                    onChange={(e) => setAftDistanceFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setAftDistanceFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2524,22 +2079,7 @@ export default function DS() {
                     label="Mean Aft"
                     value={meanAftFinal}
                     onChange={(e) => setMeanAftFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2554,7 +2094,7 @@ export default function DS() {
                     type="number"
                     label="Mid Port"
                     value={midPortFinal}
-                    onChange={(e) => setMidPortFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidPortFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2563,7 +2103,7 @@ export default function DS() {
                     variant="filled"
                     label="Mid Stbd"
                     value={midStbdFinal}
-                    onChange={(e) => setMidStbdFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidStbdFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2572,7 +2112,7 @@ export default function DS() {
                     variant="filled"
                     label="Mid Distance"
                     value={midDistanceFinal}
-                    onChange={(e) => setMidDistanceFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setMidDistanceFinal)}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2583,22 +2123,7 @@ export default function DS() {
                     label="Mean Mid"
                     value={meanMidFinal}
                     onChange={(e) => setMeanMidFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2615,22 +2140,7 @@ export default function DS() {
                     label="Fore Corrected"
                     value={foreCorrectedFinal}
                     onChange={(e) => setForeCorrectedFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2641,22 +2151,7 @@ export default function DS() {
                     label="Aft Corrected"
                     value={aftCorrectedFinal}
                     onChange={(e) => setAftCorrectedFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
 
@@ -2668,22 +2163,7 @@ export default function DS() {
                     label="Mid Corrected"
                     value={midCorrectedFinal}
                     onChange={(e) => setMidCorrectedFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2700,22 +2180,7 @@ export default function DS() {
                     label="Trim Corrected"
                     value={trimCorrectedFinal}
                     onChange={(e) => setTrimCorrectedFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2726,22 +2191,7 @@ export default function DS() {
                     label="Mean Fore Aft"
                     value={meanForeAftFinal}
                     onChange={(e) => setMeanForeAftFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2752,22 +2202,7 @@ export default function DS() {
                     label="Mean Of Mean"
                     value={meanOfMeanFinal}
                     onChange={(e) => setMeanOfMeanFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -2778,22 +2213,7 @@ export default function DS() {
                     label="Quarter Mean"
                     value={(Number(quarterMeanFinal) - Number(keelCorrectionFinal)).toFixed(2)}
                     onChange={(e) => setQuarterMeanFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
               </Grid>
@@ -2819,22 +2239,7 @@ export default function DS() {
                     label="Draft Inf"
                     value={draftInfFinal}
                     onChange={(e) => setDraftInfFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2872,22 +2277,7 @@ export default function DS() {
                     label="Quarter +50"
                     value={quarterPlus50Final}
                     onChange={(e) => setQuarterPlus50Final(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2912,22 +2302,7 @@ export default function DS() {
                     label="Quarter"
                     value={quarterMeanFinal}
                     onChange={(e) => setQuarterMeanFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2938,22 +2313,7 @@ export default function DS() {
                     label="Displacement"
                     value={displacementFinal}
                     onChange={(e) => setDisplacementFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2964,22 +2324,7 @@ export default function DS() {
                     label="Tpc"
                     value={tpcFinal}
                     onChange={(e) => setTpcFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -2990,22 +2335,7 @@ export default function DS() {
                     label="Lcf"
                     value={lcfFinal}
                     onChange={(e) => setLcfFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
 
@@ -3021,16 +2351,14 @@ export default function DS() {
                       width: "100px",
                       marginLeft: "50px",
                       '& .MuiInputLabel-root': {
-                        // Style pour le label
                         transform: 'translate(0, -1.5px) scale(0.75)',
                         transformOrigin: 'top left',
                         '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
+                          color: colors.greenAccent[500],
                         },
                       },
                       '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
+                        marginTop: '16px',
                       },
 
                     }}
@@ -3049,22 +2377,7 @@ export default function DS() {
                     label="Draft Sup"
                     value={draftSupFinal}
                     onChange={(e) => setDraftSupFinal(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -3102,22 +2415,7 @@ export default function DS() {
                     label="Quarter -50"
                     value={quarterMinus50Final}
                     onChange={(e) => setQuarterMinus50Final(e.target.value)}
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                   />
                 </Grid>
                 <Grid item xs={4} sm={2}>
@@ -3136,22 +2434,7 @@ export default function DS() {
               <Grid container spacing={0.5} alignItems="center">
                 <Grid item xs={4} sm={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     type="number"
@@ -3162,22 +2445,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="S T C "
@@ -3187,22 +2455,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="D C T"
@@ -3212,22 +2465,7 @@ export default function DS() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     label="D C D "
@@ -3256,7 +2494,7 @@ export default function DS() {
                     type="number"
                     label="Ballast"
                     value={ballastFinal}
-                    onChange={(e) => setBallastFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setBallastFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3265,7 +2503,7 @@ export default function DS() {
                     variant="filled"
                     label="F W"
                     value={freshWaterFinal}
-                    onChange={(e) => setFreshWaterFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setFreshWaterFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3274,7 +2512,7 @@ export default function DS() {
                     variant="filled"
                     label="Fuel"
                     value={fuelFinal}
-                    onChange={(e) => setFuelFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setFuelFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3283,7 +2521,7 @@ export default function DS() {
                     variant="filled"
                     label="Diesel"
                     value={dieselFinal}
-                    onChange={(e) => setDieselFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setDieselFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3293,7 +2531,7 @@ export default function DS() {
                     variant="filled"
                     label="Lub"
                     value={lubOilFinal}
-                    onChange={(e) => setLubOilFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setLubOilFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3302,7 +2540,7 @@ export default function DS() {
                     variant="filled"
                     label="Others"
                     value={othersFinal}
-                    onChange={(e) => setOthersFinal(e.target.value)}
+                    onChange={(e) => handleInputChange(e, setOthersFinal)}
                     sx={{ width: "100px" }}
                   />
                 </Grid>
@@ -3314,22 +2552,7 @@ export default function DS() {
 
                 <Grid item xs={4} sm={2} >
                   <TextField
-                    sx={{
-                      width: "100px",
-                      '& .MuiInputLabel-root': {
-                        // Style pour le label
-                        transform: 'translate(0, -1.5px) scale(0.75)',
-                        transformOrigin: 'top left',
-                        '&.Mui-disabled': {
-                          color: colors.greenAccent[500], // Garde le label visible même en disabled
-                        },
-                      },
-                      '& .MuiInput-root': {
-                        // Style pour l'input
-                        marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                      },
-
-                    }}
+                    sx={textFieldStyle}
                     disabled
                     variant="standard"
                     type="number"
@@ -3342,22 +2565,7 @@ export default function DS() {
                   <>
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Net Light"
@@ -3368,22 +2576,7 @@ export default function DS() {
 
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Constant"
@@ -3395,22 +2588,7 @@ export default function DS() {
                   <>
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Net Load"
@@ -3421,22 +2599,7 @@ export default function DS() {
 
                     <Grid item xs={4} sm={2}>
                       <TextField
-                        sx={{
-                          width: "100px",
-                          '& .MuiInputLabel-root': {
-                            // Style pour le label
-                            transform: 'translate(0, -1.5px) scale(0.75)',
-                            transformOrigin: 'top left',
-                            '&.Mui-disabled': {
-                              color: colors.greenAccent[500], // Garde le label visible même en disabled
-                            },
-                          },
-                          '& .MuiInput-root': {
-                            // Style pour l'input
-                            marginTop: '16px', // Ajoute de l'espace entre le label et la valeur
-                          },
-
-                        }}
+                        sx={textFieldStyle}
                         disabled
                         variant="standard"
                         label="Cargo"

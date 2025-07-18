@@ -1,58 +1,21 @@
 import React, { useState } from 'react';
+import { useMode } from '../theme';
+import { tokens } from '../theme';
 import {
   Box,
   TextField,
   Button,
   Typography,
   styled,
-  useTheme,
   CircularProgress,
 } from '@mui/material';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { auth } from '../firebase';
 
-// Créer un style personnalisé pour le champ de texte
-const StyledTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: '#e0e0e0',
-      borderRadius: '8px',
-    },
-    '&:hover fieldset': {
-      borderColor: '#9e9e9e',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#1976d2',
-    },
-    '& .MuiOutlinedInput-input': {
-      padding: '12px 14px',
-    },
-  },
-  '& .MuiFormLabel-root': {
-    color: '#616161',
-    fontSize: '14px',
-  },
-});
-
-// Créer un style personnalisé pour le bouton
-const StyledButton = styled(Button)({
-  textTransform: 'none',
-  borderRadius: '24px',
-  padding: '12px 32px',
-  fontSize: '16px',
-  fontWeight: 500,
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
-    transform: 'translateY(-1px)',
-  },
-});
-
 const ContactMe = () => {
-  const theme = useTheme();
-  const colors = theme.palette;
+  const [theme, colorMode] = useMode();
+  const colors   = tokens(theme.palette.mode);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -64,6 +27,53 @@ const ContactMe = () => {
   });
 
   const [loading, setLoading] = useState(false);
+
+  // Créer un style personnalisé pour le champ de texte
+  const StyledTextField = styled(TextField)({
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: colors.greenAccent[400],
+        borderRadius: '8px',
+      },
+      '&:hover fieldset': {
+        borderColor: colors.greenAccent[400],
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: colors.primary.main,
+      },
+      '& .MuiOutlinedInput-input': {
+        padding: '12px 14px',
+      },
+    },
+    '& .MuiFormLabel-root': {
+      color: colors.grey[400],
+      fontSize: '14px',
+    },
+  });
+
+  // Créer un style personnalisé pour le bouton
+  const StyledButton = styled(Button)({
+    textTransform: 'none',
+    borderRadius: '24px',
+    padding: '12px 32px',
+    fontSize: '16px',
+    fontWeight: 500,
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s ease',
+    backgroundColor: colors.primary.main,
+    '&:hover': {
+      backgroundColor: colors.primary.dark,
+      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+      transform: 'translateY(-1px)',
+    },
+    '&:disabled': {
+      backgroundColor: colors.grey[400],
+      opacity: 0.7,
+    },
+  });
+
+
+ 
 
   const handleChange = (e) => {
     const { name, value } = e.target;

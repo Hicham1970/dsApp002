@@ -22,6 +22,38 @@ const Infos = () => {
   display: none !important;
 }
 `;
+
+  // Variable de style commune pour tous les TextField
+  const textFieldStyle = {
+    '& .MuiInputLabel-root': {
+      transform: 'translate(0, -1.5px) scale(0.75)',
+      transformOrigin: 'top left',
+      '&.Mui-disabled': {
+        color: colors.greenAccent[500],
+      },
+    },
+    '& .MuiInput-root': {
+      marginTop: '16px',
+    },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: colors.greenAccent[500],
+      },
+      '&:hover fieldset': {
+        borderColor: colors.greenAccent[400],
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: colors.greenAccent[500],
+      },
+    },
+    '& .MuiInputBase-input': {
+      color: colors.grey[100],
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: colors.greenAccent[500],
+    },
+  };
+
   // État pour stocker les valeurs des champs
   const [nationality, setNationality] = useState('');
   const [portOfRegistration, setPortOfRegistration] = useState('');
@@ -41,9 +73,6 @@ const Infos = () => {
   const [finalSurveyCommenced, setFinalSurveyCommenced] = useState('');
   const [finalSurveyCompleted, setFinalSurveyCompleted] = useState('');
   const [vesselDeparted, setVesselDeparted] = useState('');
-
-  //? TODO Fonction pour gérer la soumission du formulaire
-  //! TODO * Il y un composant qui re-render sans cesse en raison de la soumission du formulaire 
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -146,229 +175,61 @@ const Infos = () => {
             <TextField
               fullWidth
               type="text"
-              variant="outlined"
+              variant="standard"
               label="Nationalité"
               value={nationality}
               onChange={(e) => setNationality(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="text"
-              variant="outlined"
+              variant="standard"
               label="Port d'Enregistrement"
               value={portOfRegistration}
               onChange={(e) => setPortOfRegistration(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="text"
-              variant="outlined"
+              variant="standard"
               label="Nom du Vaisseau"
               value={vessel}
               onChange={(e) => setVessel(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="text"
-              variant="outlined"
+              variant="standard"
               label="Cargo"
               value={cargo}
               onChange={(e) => setCargo(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
-              variant="outlined"
+              variant="standard"
               type="text"
               label="Port"
               value={port}
               onChange={(e) => setPort(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
-              variant="outlined"
+              variant="standard"
               label="Port de Chargement"
               value={portOfLoading}
               onChange={(e) => setPortOfLoading(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
           </Grid>
 
@@ -377,230 +238,62 @@ const Infos = () => {
             <TextField
               fullWidth
               type="text"
-              variant="outlined"
+              variant="standard"
               label="Port de Déchargement"
               value={portOfDischarging}
               onChange={(e) => setPortOfDischarging(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="number"
-              variant="outlined"
+              variant="standard"
               label="Poids BL"
               value={blWeight}
               onChange={(e) => setBlWeight(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
-              variant="outlined"
+              variant="standard"
               label="Date BL"
               type="date"
               value={blDate}
               onChange={(e) => setBlDate(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Vessel Arrived"
               value={vesselArrived}
               onChange={(e) => setVesselArrived(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Vessel Berthed"
               value={vesselBerthed}
               onChange={(e) => setVesselBerthed(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Initial Survey Commenced"
               value={initialSurveyCommenced}
               onChange={(e) => setInitialSurveyCommenced(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
           </Grid>
 
@@ -609,230 +302,62 @@ const Infos = () => {
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Initial Survey Completed"
               value={initialSurveyCompleted}
               onChange={(e) => setInitialSurveyCompleted(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Operation Commenced"
               value={operationCommenced}
               onChange={(e) => setOperationCommenced(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Operation Completed"
               value={operationCompleted}
               onChange={(e) => setOperationCompleted(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Final Survey Commenced"
               value={finalSurveyCommenced}
               onChange={(e) => setFinalSurveyCommenced(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Final Survey Completed"
               value={finalSurveyCompleted}
               onChange={(e) => setFinalSurveyCompleted(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
             <TextField
               fullWidth
               type="date"
-              variant="outlined"
+              variant="standard"
               label="Vessel Departed"
               value={vesselDeparted}
               onChange={(e) => setVesselDeparted(e.target.value)}
               margin="normal"
-              sx={{
-                '& .MuiInputLabel-root': {
-                  transform: 'translate(0, -1.5px) scale(0.75)',
-                  transformOrigin: 'top left',
-                  '&.Mui-disabled': {
-                    color: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInput-root': {
-                  marginTop: '16px',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.greenAccent[400],
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.greenAccent[500],
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: colors.grey[100], // Pour le texte en mode dark
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: colors.greenAccent[500],
-                },
-              }}
+              sx={textFieldStyle}
             />
           </Grid>
         </Grid>
